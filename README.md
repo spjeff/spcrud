@@ -13,7 +13,7 @@ Make SharePoint 2013 list item edits easy from JavaScript with a common library 
 1. upload files to /SiteAssets/
 ![image](https://raw.githubusercontent.com/spjeff/spcrud/master/doc/1.png)
 2. homepage with Content Editor pointed at /SiteAssets/spcrud-demo.html
-![image](https://raw.githubusercontent.com/spjeff/spcrud/doc/2.png)
+![image](https://raw.githubusercontent.com/spjeff/spcrud/master/doc/2.png)
 3. Create
 ![image](https://raw.githubusercontent.com/spjeff/spcrud/master/doc/3.png)
 4. Read
