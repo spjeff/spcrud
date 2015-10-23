@@ -23,6 +23,6 @@ Make SharePoint 2013 list item edits easy from JavaScript with a common library 
 6. Delete
 ![image](https://raw.githubusercontent.com/spjeff/spcrud/master/doc/6.png)
 
-## Questions and Suggestions
+## Contact
 Please drop a line to [@spjeff](https://twitter.com/spjeff) or [spjeff@spjeff.com](mailto:spjeff@spjeff.com)
 Thanks!  =)
