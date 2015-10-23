@@ -49,7 +49,7 @@ spcrud.readItem = function ($http, listName, id) {
     return $http(config);
 };
 
-//update item
+//UPDATE item
 spcrud.update = function ($http, listName, id, jsonBody) {
     //append HTTP header MERGE for UPDATE scenario
     var headers = JSON.parse(JSON.stringify(spcrud.headers));
