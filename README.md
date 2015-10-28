@@ -26,3 +26,5 @@ Make SharePoint 2013 list item edits easy from JavaScript with a common library 
 ## Contact
 Please drop a line to [@spjeff](https://twitter.com/spjeff) or [spjeff@spjeff.com](mailto:spjeff@spjeff.com)
 Thanks!  =)
+
+![image](http://img.shields.io/badge/first--timers--only-friendly-blue.svg?style=flat-square)
