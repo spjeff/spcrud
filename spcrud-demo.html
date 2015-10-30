@@ -1,29 +1,42 @@
-<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.9/angular.min.js"></script>
-<script src="/Shared%20Documents/spcrud.js"></script>
-<script src="/Shared%20Documents/spcrud-demo.js"></script>
+<!--Live demo of SPCRUD library features-->
 
-<!--AngularJS-->
+<!--Third Party-->
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.9/angular.js"></script>
+
+<!--Application-->
+<script src="/sites/team/SiteAssets/spcrud.js"></script>
+<script src="/sites/team/SiteAssets/spcrud-demo.js"></script>
+
+<!--Main-->
 <div ng-app="spcrudApp">
-	<div ng-controller="spcrudCtl">
+    <div ng-controller="spcrudCtl">
 
-		<h1>SPCRUD</h1>
-		<hr/>
-		<p>
-			List name:
-			<input type="text" ng-model="listName"/>
-			<br/>
-			Id:
-			<span ng-bind="itemId"></span>
-		</p>
-		<hr/>
-		<p>
-			<input type="button" ng-click="create()" value="Create"/>
-			<input type="button" ng-click="read()" value="Read"/>
-			<input type="button" ng-click="update()" ng-disabled="!itemId" value="Update"/>
-			<input type="button" ng-click="del()" ng-disabled="!itemId" value="Delete"/>
-		</p>
-		<p>
-			<span ng-bind="status"></span>
-		</p>
-	</div>
+        <h2>SPCRUD Demo - SharePoint List Create/Read/Update/Delete</h2>
+        <hr/>
+
+        <p>
+            List name:
+            <input type="text" ng-model="listName" />
+            <br/> Id:
+            <span ng-bind="itemId"></span>
+        </p>
+        <hr/>
+
+        <p>
+            <input type="button" ng-click="create()" value="Create" />
+            <input type="button" ng-click="read()" value="Read" />
+            <input type="button" ng-click="update()" ng-disabled="!itemId" value="Update" />
+            <input type="button" ng-click="del()" ng-disabled="!itemId" value="Delete" />
+        </p>
+        <p>
+            <span ng-bind="status"></span>
+        </p>
+        <hr/>
+
+        <h2>JSON blob settings Read/Write</h2>
+        <input type="button" ng-click="settingsRead()" value="Read" />
+        <input type="button" ng-click="settingsWrite()" value="Write" />
+        <textarea rows="5" cols="80" ng-model="settings" />
+
+    </div>
 </div>
