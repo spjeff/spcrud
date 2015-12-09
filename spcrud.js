@@ -46,6 +46,11 @@ spcrud.init = function () {
 };
 spcrud.init();
 
+//string endsWith()
+function endsWith(str, suffix) {
+    return str.indexOf(suffix, str.length - suffix.length) !== -1;
+}
+
 //digest refresh worker
 spcrud.refreshDigest = function ($http) {
     var config = {
@@ -106,10 +111,23 @@ spcrud.create = function ($http, listName, jsonBody) {
 };
 
 //READ entire list - needs $http factory and SharePoint list name
-spcrud.read = function ($http, listName) {
+spcrud.read = function ($http, listName, filter, sel, orderby) {
+	//build URL syntax
+	var url = spcrud.apiUrl.replace('{0}', listName);
+	if (filter) {
+		url += ((endsWith(url,'items')): "?" : "&") + "$filter=" + filter
+	}
+	if (sel) {
+		url += ((endsWith(url,'items')): "?" : "&") +"$select=" + sel
+	}
+	if (orderby) {
+		url += ((endsWith(url,'items')): "?" : "&") +"$orderby=" + orderby
+	}
+	
+	//config
     var config = {
         method: 'GET',
-        url: spcrud.apiUrl.replace('{0}', listName),
+        url: url,
         headers: spcrud.headers
     };
     return $http(config);
