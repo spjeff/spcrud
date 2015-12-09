@@ -115,13 +115,13 @@ spcrud.read = function ($http, listName, filter, sel, orderby) {
 	//build URL syntax
 	var url = spcrud.apiUrl.replace('{0}', listName);
 	if (filter) {
-		url += ((endsWith(url,'items')): "?" : "&") + "$filter=" + filter
+		url += ((endsWith(url,'items'))? "?" : "&") + "$filter=" + filter;
 	}
 	if (sel) {
-		url += ((endsWith(url,'items')): "?" : "&") +"$select=" + sel
+		url += ((endsWith(url,'items'))? "?" : "&") + "$select=" + sel;
 	}
 	if (orderby) {
-		url += ((endsWith(url,'items')): "?" : "&") +"$orderby=" + orderby
+		url += ((endsWith(url,'items'))? "?" : "&") + "$orderby=" + orderby;
 	}
 	
 	//config
@@ -233,7 +233,7 @@ spcrud.jsonWrite = function ($http, listName, jsonBody) {
                 return spcrud.update($http, listName, item.Id, item);
             } else {
                 //create if missing
-                var item = {
+                item = {
                     '__metadata': {
                         'type': 'SP.ListItem'
                     },
@@ -242,6 +242,6 @@ spcrud.jsonWrite = function ($http, listName, jsonBody) {
                 };
                 return spcrud.create($http, listName, item);
             }
-        });  
+        });
     });
 };
