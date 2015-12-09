@@ -19,28 +19,82 @@
 * spjeff@spjeff.com
 * http://spjeff.com
 *
-* last updated 10-30-2015
+* last updated 12-07-2015
 */
 
 //namespace
 var spcrud = spcrud || {};
 
-//configuration
-spcrud.apiUrl = _spPageContextInfo.webAbsoluteUrl + '/_api/web/lists/getbytitle(\'{0}\')/items';
-spcrud.json = 'application/json;odata=verbose';
-spcrud.headers = {
-    'Content-Type': spcrud.json,
-    'Accept': spcrud.json,
-    'X-RequestDigest': document.querySelector('#__REQUESTDIGEST').value
+//----------SHARED----------
+
+//initialize
+spcrud.init = function () {
+    //globals
+    spcrud.apiUrl = _spPageContextInfo.webAbsoluteUrl + '/_api/web/lists/getbytitle(\'{0}\')/items';
+    spcrud.json = 'application/json;odata=verbose';
+    spcrud.headers = {
+        'Content-Type': spcrud.json,
+        'Accept': spcrud.json
+    };
+
+    //request digest
+    var el = document.querySelector('#__REQUESTDIGEST');
+    if (el) {
+        //digest local to ASPX page
+        spcrud.headers['X-RequestDigest'] = el.value;
+    }
 };
+spcrud.init();
+
+//digest refresh worker
+spcrud.refreshDigest = function ($http) {
+    var config = {
+        method: 'POST',
+        url: _spPageContextInfo.webAbsoluteUrl + '/_api/contextinfo',
+        headers: spcrud.headers
+    };
+    return $http(config).then(function (response) {
+        //parse JSON and save
+        spcrud.headers['X-RequestDigest'] = response.data.d.GetContextWebInformation.FormDigestValue;
+    });
+ 
+};
+
+//lookup SharePoint current web user
+spcrud.getCurrentUser = function ($http) {
+    var url = _spPageContextInfo.webAbsoluteUrl + '/_api/web/currentuser';
+    var config = {
+        method: 'GET',
+        url: url,
+        cache: true,
+        headers: spcrud.headers
+    };
+    return $http(config);
+};
+
+//lookup SharePoint my profile
+spcrud.getMyProfile = function ($http) {
+    var url = _spPageContextInfo.webAbsoluteUrl + '/_api/SP.UserProfiles.PeopleManager/GetMyProperties';
+    var config = {
+        method: 'GET',
+        url: url,
+        cache: true,
+        headers: spcrud.headers
+    };
+    return $http(config);
+};
+//----------CORE----------
+
 
 //CREATE item - needs $http factory, SharePoint list name, and JS object to stringify for save
 spcrud.create = function ($http, listName, jsonBody) {
     //append metadata
-    jsonBody['__metadata'] = {
-        'type': 'SP.ListItem'
-    };
-    var data = JSON.stringify(jsonBody);
+    if (!jsonBody['__metadata']) {
+        jsonBody['__metadata'] = {
+            'type': 'SP.ListItem'
+        };
+    }
+    var data = angular.toJson(jsonBody);
 
     var config = {
         method: 'POST',
@@ -79,10 +133,12 @@ spcrud.update = function ($http, listName, id, jsonBody) {
     headers['If-Match'] = '*';
 
     //append metadata
-    jsonBody['__metadata'] = {
-        'type': 'SP.ListItem'
-    };
-    var data = JSON.stringify(jsonBody);
+    if (!jsonBody['__metadata']) {
+        jsonBody['__metadata'] = {
+            'type': 'SP.ListItem'
+        };
+    }
+    var data = angular.toJson(jsonBody);
 
     var config = {
         method: 'POST',
@@ -108,53 +164,36 @@ spcrud.del = function ($http, listName, id) {
     return $http(config);
 };
 
-//parse SharePoint item ID from generic HTTP response
-spcrud.getId = function (resp) {
-    var item;
-    if (resp.data.d.results) {
-        //EDIT - nest JSON deeper in a 'results' object
-        if (resp.data.d.results.constructor === Array) {
-            item = resp.data.d.results[0];
-        } else {
-            item = resp.data.d.results;
-        }
-    } else {
-        //READ - flatter JSON response format
-        if (resp.data.d.constructor === Array) {
-            item = resp.data.d[0];
-        } else {
-            item = resp.data.d;
-        }
-    }
-    return (item) ? item.Id : null;
-};
-
-//lookup SharePoint Current User
-spcrud.getCurrentUser = function ($http) {
-    var url = _spPageContextInfo.webAbsoluteUrl + '/_api/web/currentuser';
-    var config = {
-        method: 'GET',
-        url: url,
-        cache: true,
-        headers: spcrud.headers
-    };
-    return $http(config);
-};
-
 //JSON blob read from SharePoint list - needs $http factory and SharePoint list name
-spcrud.jsonRead = function ($http, listName) {
+spcrud.jsonRead = function ($http, listName, cache) {
     return spcrud.getCurrentUser($http).then(function (response) {
-        //login name
-        spcrud.login = response.data.d.LoginName;
+        //GET SharePoint Current User
+        spcrud.currentUser = response.data.d;
+        spcrud.login = response.data.d.LoginName.toLowerCase();
+        if (spcrud.login.indexOf('\\')) {
+            //parse domain prefix
+            spcrud.login = spcrud.login.split('\\')[1];
+        }
 
-        //GET SharePoint list
+        //default no caching
+        if (!cache) {
+            cache = false;
+        }
+
+        //GET SharePoint list item(s)
         var config = {
             method: 'GET',
             url: spcrud.apiUrl.replace('{0}', listName) + '?$select=JSON,Id,Title&$filter=Title+eq+\'' + spcrud.login + '\'',
+            cache: cache,
             headers: spcrud.headers
         };
+        
+        //GET SharePoint Profile
+        spcrud.getMyProfile($http).then(function (response) {
+            spcrud.myProfile = response.data.d;
+        });
 
-        //clean JSON response to SPListItem only
+        //parse single SPListItem only
         return $http(config).then(function (response) {
             if (response.data.d.results) {
                 return response.data.d.results[0];
@@ -167,22 +206,24 @@ spcrud.jsonRead = function ($http, listName) {
 
 //JSON blob write to SharePoint list - needs $http factory, SharePoint list name, and JS object to stringify for save
 spcrud.jsonWrite = function ($http, listName, jsonBody) {
-    return spcrud.jsonRead($http, listName).then(function (item) {
-        //HTTP 200 OK
-        if (item) {
-            //update if found
-            item.JSON = JSON.stringify(jsonBody);
-            return spcrud.update($http, listName, item.Id, item);
-        } else {
-            //create if missing
-            var item = {
-                '__metadata': {
-                    'type': 'SP.ListItem'
-                },
-                'Title': spcrud.login,
-                'JSON': JSON.stringify(jsonBody)
-            };
-            return spcrud.create($http, listName, item);
-        }
+    return spcrud.refreshDigest($http).then(function (response) {
+        return spcrud.jsonRead($http, listName).then(function (item) {
+            //HTTP 200 OK
+            if (item) {
+                //update if found
+                item.JSON = angular.toJson(jsonBody);
+                return spcrud.update($http, listName, item.Id, item);
+            } else {
+                //create if missing
+                var item = {
+                    '__metadata': {
+                        'type': 'SP.ListItem'
+                    },
+                    'Title': spcrud.login,
+                    'JSON': angular.toJson(jsonBody)
+                };
+                return spcrud.create($http, listName, item);
+            }
+        });  
     });
 };
