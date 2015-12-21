@@ -19,7 +19,7 @@
  * spjeff@spjeff.com
  * http://spjeff.com
  *
- * last updated 12-10-2015
+ * last updated 12-21-2015
  */
 
 //namespace
@@ -83,7 +83,7 @@ spcrud.refreshDigest = function ($http) {
 
 //lookup SharePoint current web user
 spcrud.getCurrentUser = function ($http) {
-    var url = spcrud.baseUrl + '/_api/web/currentuser';
+    var url = spcrud.baseUrl + '/_api/web/currentuser?$expand=Groups';
     var config = {
         method: 'GET',
         url: url,
