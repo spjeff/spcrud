@@ -19,7 +19,7 @@
  * spjeff@spjeff.com
  * http://spjeff.com
  *
- * last updated 12-21-2015
+ * last updated 02-12-2016
  */
 
 //namespace
@@ -63,15 +63,15 @@ spcrud.setBaseUrl = function(webUrl) {
 spcrud.setBaseUrl();
 
 //string helper function - endsWith()
-spcrud.endsWith(str, suffix) {
+spcrud.endsWith = function(str, suffix) {
     return str.indexOf(suffix, str.length - suffix.length) !== -1;
-}
+};
 
 //digest refresh worker
 spcrud.refreshDigest = function ($http) {
     var config = {
         method: 'POST',
-        url: spcrud.baseUrl + '/_api/contextinfo';
+        url: spcrud.baseUrl + '/_api/contextinfo',
         headers: spcrud.headers
     };
     return $http(config).then(function (response) {
