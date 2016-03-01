@@ -1,0 +1,32 @@
+{
+  "name": "spcrud",
+  "version": "0.1.0",
+  "description": "Make SharePoint 2013 list item edits easy from JavaScript with a common library that generates HTTP traffic formatted with correct headers and verbs. Enjoy!",
+  "main": "spcrud.js",
+  "directories": {
+    "doc": "doc"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/spjeff/spcrud.git"
+  },
+  "keywords": [
+    "SharePoint",
+    "SharePoint",
+    "2013",
+    "Office",
+    "365",
+    "REST",
+    "SPList",
+    "CRUD"
+  ],
+  "author": "Jeff Jones <spjeff@spjeff.com> (http://spjeff.com)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/spjeff/spcrud/issues"
+  },
+  "homepage": "https://github.com/spjeff/spcrud#readme"
+}
