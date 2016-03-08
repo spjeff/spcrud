@@ -93,13 +93,24 @@ spcrud.getCurrentUser = function ($http) {
     return $http(config);
 };
 
-//lookup SharePoint my profile
+//lookup my SharePoint profile
 spcrud.getMyProfile = function ($http) {
     var url = spcrud.baseUrl + '/_api/SP.UserProfiles.PeopleManager/GetMyProperties';
     var config = {
         method: 'GET',
         url: url,
         cache: true,
+        headers: spcrud.headers
+    };
+    return $http(config);
+};
+
+//lookup any SharePoint profile
+spcrud.getProfile = function ($http, login) {
+    var url = spcrud.baseUrl + '/_api/SP.UserProfiles.PeopleManager/GetPropertiesFor(accountName=@v)?@v=\'' + login + '\'';
+    var config = {
+        method: 'GET',
+        url: url,
         headers: spcrud.headers
     };
     return $http(config);
