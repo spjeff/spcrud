@@ -1,7 +1,7 @@
 /**
  * Library with AngularJS operations for CRUD operations to SharePoint 2013 lists over REST api
  *
- * Contains 6 core functions
+ * Contains 6 core functions and other misc helper functions
  *
  * 1) Create    - add item to List
  * 2) Read      - find all items or single item from List
@@ -19,7 +19,7 @@
  * spjeff@spjeff.com
  * http://spjeff.com
  *
- * last updated 03-08-2016
+ * last updated 03-10-2016
  */
 
 //namespace
@@ -124,6 +124,47 @@ spcrud.ensureUser = function($http, login) {
         url: url,
         headers: spcrud.headers,
         data: login
+    };
+    return $http(config);
+};
+
+//create folder
+spcrud.createFolder = function($http, folderUrl) {
+    var data = { '__metadata': { 'type': 'SP.Folder' }, 'ServerRelativeUrl': folderUrl };
+
+    var url = spcrud.baseUrl + '/_api/web/folders';
+    var config = {
+        method: 'POST',
+        url: url,
+        headers: spcrud.headers,
+        data: data
+    };
+    return $http(config);
+};
+
+//upload file to folder
+spcrud.uploadFile = function($http, folderUrl, fileUrl, binary) {
+    var url = spcrud.baseUrl + '/_api/web/getfolderbyserverrelativeurl(\'' + folderUrl + '\')/files/add(overwrite=true, url=\'' + fileUrl + '\')';
+    var config = {
+        method: 'POST',
+        url: url,
+        headers: spcrud.headers,
+        data: binary
+    };
+    return $http(config);
+};
+
+//misc use for any URL call
+spcrud.misc = function($http, method, apiUrl, data) {
+    //example
+    //method : POST
+    //apiUrl : /_api/web/contextinfo
+    var url = spcrud.baseUrl + apiUrl;
+    var config = {
+        method: verb,
+        url: url,
+        headers: spcrud.headers,
+        data: data
     };
     return $http(config);
 };
