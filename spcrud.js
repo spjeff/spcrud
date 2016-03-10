@@ -30,7 +30,7 @@ var spcrud = spcrud || {};
 //initialize
 spcrud.init = function() {
     //default to local web URL
-    spcrud.apiUrl = spcrud.baseUrl + '/_api/web/lists/getbytitle(\'{0}\')/items';
+    spcrud.apiUrl = spcrud.baseUrl + '/_api/web/lists/GetByTitle(\'{0}\')/items';
 
     //globals
     spcrud.jsonHeader = 'application/json;odata=verbose';
@@ -144,12 +144,36 @@ spcrud.createFolder = function($http, folderUrl) {
 
 //upload file to folder
 spcrud.uploadFile = function($http, folderUrl, fileUrl, binary) {
-    var url = spcrud.baseUrl + '/_api/web/getfolderbyserverrelativeurl(\'' + folderUrl + '\')/files/add(overwrite=true, url=\'' + fileUrl + '\')';
+    var url = spcrud.baseUrl + '/_api/web/GetFolderByServerRelativeUrl(\'' + folderUrl + '\')/files/add(overwrite=true, url=\'' + fileUrl + '\')';
     var config = {
         method: 'POST',
         url: url,
         headers: spcrud.headers,
         data: binary
+    };
+    return $http(config);
+};
+
+//upload file to folder
+spcrud.uploadAttach = function($http, listName, id, fileName, binary) {
+    var url = spcrud.baseUrl + '/_api/web/lists/GetByTitle(\'' + listName + '\')/items(' + id + ')/AttachmentFiles/add(FileName=\'' + fileName + '\')';
+    var config = {
+        method: 'POST',
+        url: url,
+        headers: spcrud.headers,
+        data: binary
+    };
+    return $http(config);
+};
+
+
+//upload file to folder
+spcrud.getAttach = function($http, listName, id) {
+    var url = spcrud.baseUrl + '/_api/web/lists/GetByTitle(\'' + listName + '\')/items(' + id + ')/AttachmentFiles';
+    var config = {
+        method: 'GET',
+        url: url,
+        headers: spcrud.headers
     };
     return $http(config);
 };
