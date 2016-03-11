@@ -185,7 +185,7 @@ spcrud.misc = function($http, method, apiUrl, data) {
     //apiUrl : /_api/web/contextinfo
     var url = spcrud.baseUrl + apiUrl;
     var config = {
-        method: verb,
+        method: method,
         url: url,
         headers: spcrud.headers,
         data: data
