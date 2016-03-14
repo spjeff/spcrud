@@ -19,7 +19,7 @@
  * spjeff@spjeff.com
  * http://spjeff.com
  *
- * last updated 03-10-2016
+ * last updated 03-14-2016
  */
 
 //namespace
@@ -95,7 +95,7 @@ spcrud.getCurrentUser = function($http) {
 
 //lookup my SharePoint profile
 spcrud.getMyProfile = function($http) {
-    var url = spcrud.baseUrl + '/_api/SP.UserProfiles.PeopleManager/GetMyProperties';
+    var url = spcrud.baseUrl + '/_api/SP.UserProfiles.PeopleManager/GetMyProperties?select=*';
     var config = {
         method: 'GET',
         url: url,
@@ -107,7 +107,7 @@ spcrud.getMyProfile = function($http) {
 
 //lookup any SharePoint profile
 spcrud.getProfile = function($http, login) {
-    var url = spcrud.baseUrl + '/_api/SP.UserProfiles.PeopleManager/GetPropertiesFor(accountName=@v)?@v=\'' + login + '\'';
+    var url = spcrud.baseUrl + '/_api/SP.UserProfiles.PeopleManager/GetPropertiesFor(accountName=@v)?@v=\'' + login + '\'&select=*';
     var config = {
         method: 'GET',
         url: url,
