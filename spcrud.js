@@ -215,8 +215,9 @@ spcrud.create = function($http, listName, jsonBody) {
 };
 
 //READ entire list - needs $http factory and SharePoint list name
-spcrud.read = function($http, listName, filter, selectt, orderby) {
+spcrud.read = function($http, listName, filter, selectt, orderby, expand, top, skip) {
     //build URL syntax
+    //https://msdn.microsoft.com/en-us/library/office/fp142385.aspx#bk_support
     var url = spcrud.apiUrl.replace('{0}', listName);
     if (filter) {
         url += ((spcrud.endsWith(url, 'items')) ? "?" : "&") + "$filter=" + filter;
@@ -227,7 +228,16 @@ spcrud.read = function($http, listName, filter, selectt, orderby) {
     if (orderby) {
         url += ((spcrud.endsWith(url, 'items')) ? "?" : "&") + "$orderby=" + orderby;
     }
-
+    if (expand) {
+        url += ((spcrud.endsWith(url, 'items')) ? "?" : "&") + "$expand=" + expand;
+    }
+    if (top) {
+        url += ((spcrud.endsWith(url, 'items')) ? "?" : "&") + "$top=" + top;
+    }
+    if (skip) {
+        url += ((spcrud.endsWith(url, 'items')) ? "?" : "&") + "$skip=" + skip;
+    }
+    
     //config
     var config = {
         method: 'GET',
