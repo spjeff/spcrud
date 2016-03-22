@@ -12,13 +12,13 @@ function spcrudCtl($scope, $http) {
         spcrud.create($http, vm.listName, {
             'Title': 'Hello World'
         }).then(function (resp) {
-            vm.itemId = spcrud.getId(resp);
+            vm.itemId = resp.data.d.ID;
             vm.done('CREATE Id=' + vm.itemId);
         });
     };
     vm.read = function () {
         spcrud.read($http, vm.listName).then(function (resp) {
-            vm.itemId = spcrud.getId(resp);
+            vm.itemId = resp.data.d.results[0].ID;
             vm.done('READ Id=' + vm.itemId);
         });
     };
@@ -43,7 +43,7 @@ function spcrudCtl($scope, $http) {
 
     //JSON blob read
     vm.settingsRead = function () {
-        spcrud.jsonRead($http, 'JSON-Settings').then(function (item) {
+        spcrud.jsonRead($http, 'Test').then(function (item) {
             if (item) {
                 //success
                 console.log('settingsRead');
@@ -55,7 +55,7 @@ function spcrudCtl($scope, $http) {
 
     //JSON blob write
     vm.settingsWrite = function () {
-        spcrud.jsonWrite($http, 'JSON-Settings', vm.settings).then(function (response) {
+        spcrud.jsonWrite($http, 'Test', vm.settings).then(function (response) {
             //response
             console.log('settingsWrite');
             console.log(response);
