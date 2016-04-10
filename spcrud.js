@@ -19,7 +19,8 @@
  * spjeff@spjeff.com
  * http://spjeff.com
  *
- * last updated 03-14-2016
+ * version 0.1.3
+ * last updated 04-09-2016
  */
 
 //namespace
@@ -258,7 +259,7 @@ spcrud.readItem = function($http, listName, id) {
 };
 
 //UPDATE item - needs $http factory, SharePoint list name, item ID number, and JS object to stringify for save
-spcrud.update = function($http, listName, id, jsonBody, webUrl) {
+spcrud.update = function($http, listName, id, jsonBody) {
     //append HTTP header MERGE for UPDATE scenario
     var headers = JSON.parse(JSON.stringify(spcrud.headers));
     headers['X-HTTP-Method'] = 'MERGE';
