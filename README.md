@@ -9,6 +9,9 @@ Make SharePoint 2013 list item edits easy from JavaScript with a common library 
 4. create new Custom List (ex: "Test")
 5. click buttons to run CRUD operations on list "Test" (or any list)
 
+## Video
+[![](https://raw.githubusercontent.com/spjeff/spcrud/master/doc/7.png)](http://www.spjeff.com/2016/04/10/video-get-started-with-spcrud-js/ "Get Started with SPCRUD")
+
 ## Sceenshots
 1. upload files to /SiteAssets/
 ![image](https://raw.githubusercontent.com/spjeff/spcrud/master/doc/1.png)
