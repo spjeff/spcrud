@@ -19,8 +19,11 @@
  * spjeff@spjeff.com
  * http://spjeff.com
  *
- * version 0.1.3
- * last updated 04-09-2016
+ * version 0.1.4
+ * last updated 04-11-2016
+ *
+ * BETA - MS Access Web Database "acc*" methods
+ *
  */
 
 //namespace
@@ -32,6 +35,7 @@ var spcrud = spcrud || {};
 spcrud.init = function() {
     //default to local web URL
     spcrud.apiUrl = spcrud.baseUrl + '/_api/web/lists/GetByTitle(\'{0}\')/items';
+	spcrud.accUrl = spcrud.baseUrl + '/_vti_bin/accsrv/accessportal.json/GetData';
 
     //globals
     spcrud.jsonHeader = 'application/json;odata=verbose';
@@ -359,4 +363,73 @@ spcrud.jsonWrite = function($http, listName, jsonBody) {
             }
         });
     });
+};
+
+// Access Web Database 
+// CREATE
+spcrud.accCreate = function($http, tableName, values) {
+    var data = spcrud.accDB(tableName);
+	data.updateRecord = {
+		NewValues : values
+	};
+    var config = {
+        method: 'POST',
+        url: spcrud.accUrl.replace('GetData','InsertRecords'),
+        headers: spcrud.headers,
+		data: data
+    };
+    return $http(config);
+};
+// READ
+spcrud.accDB = function (tableName) {
+	return {"dataBaseInfo":{"AllowAdditions":true,"AllowDeletions":true,"AllowEdits":true,"DataEntry":false,"DoNotPrefetchImages":false,"InitialPage":"0","SelectCommand":tableName,"FetchSchema":false,"NewImageStorage":true},"pagingInfo":{"FirstRow":0,"PageSize":50,"RetrieveExactRowCount":false,"UseCache":false,"SessionId":null}};
+};
+spcrud.accRead = function($http, tableName) {
+    var config = {
+        method: 'POST',
+        url: spcrud.accUrl,
+        headers: spcrud.headers,
+		data: spcrud.accDB(tableName)
+    };
+    return $http(config);
+};
+spcrud.accReadItem = function($http, tableName, id) {
+	var data = spcrud.accDB(tableName);
+	data.dataBaseInfo.Restriction = "<Expression xmlns='http://schemas.microsoft.com/office/accessservices/2010/12/application'><FunctionCall Name='='><Identifier Name='ID' Index= '0' /><StringLiteral Value='"+ id +"' Index='1' /></FunctionCall></Expression>";
+    var config = {
+        method: 'POST',
+        url: spcrud.accUrl,
+        headers: spcrud.headers,
+		data: data
+    };
+    return $http(config);
+};
+// UPDATE
+spcrud.accUpdate = function($http, tableName, id, values) {
+	values.unshift(id);
+    var data = spcrud.accDB(tableName);
+	data.updateRecord = {
+		OriginalValues : values
+	};
+    var config = {
+        method: 'POST',
+        url: spcrud.accUrl.replace('GetData','UpdateRecords'),
+        headers: spcrud.headers,
+		data: data
+    };
+    return $http(config);
+};
+// DELETE
+spcrud.accDelete = function($http, tableName, id) {
+	var data = spcrud.accDB(tableName);
+	data.updateRecord = {
+		OriginalValues : [id]
+	};
+    var config = {
+        method: 'POST',
+        url: spcrud.accUrl.replace('GetData','DeleteRecords'),
+        headers: spcrud.headers,
+		data: data
+    };
+    return $http(config);
 };
