@@ -40,15 +40,16 @@
 		<h2>MS Access ACCDW - SQL Azure CRUD</h2>
 	    <hr/>	
 	    <p>
-	    	Subweb URL stem:
+	    	Subweb URL:
             <input type="text" ng-model="accSubweb" />
             <br/>
             Table name:
             <input type="text" ng-model="accTable" />
             <br/> Id:
-            <span ng-bind="accId"></span>
+            <input type="text" ng-model="accId" size="3"/>
             <input type="button" ng-click="accCreate()" value="Create" />
             <input type="button" ng-click="accRead()" value="Read" />
+            <input type="button" ng-click="accReadID()" value="Read ID" />
             <input type="button" ng-click="accUpdate()" ng-disabled="!accId" value="Update" />
             <input type="button" ng-click="accDelete()" ng-disabled="!accId" value="Delete" />
             

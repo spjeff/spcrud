@@ -370,19 +370,19 @@ spcrud.accDB = function (tableName, method) {
 	switch (method) {
 		case 'read':
 		//READ
-		return {"dataBaseInfo":{"AllowAdditions":true,"AllowDeletions":true,"AllowEdits":true,"DataEntry":false,"DoNotPrefetchImages":false,"InitialPage":"0","SelectCommand":tableName,"FetchSchema":false,"NewImageStorage":true},"pagingInfo":{"FirstRow":0,"PageSize":50,"RetrieveExactRowCount":true,"SortExpression":null,"UseCache":false,"SessionId":null}};
+		return {"dataBaseInfo":{"AllowAdditions":true,"AllowDeletions":true,"AllowEdits":true,"DataEntry":false,"DoNotPrefetchImages":false,"InitialPage":"0","SelectCommand":tableName,"FetchSchema":true,"NewImageStorage":true},"pagingInfo":{"FirstRow":0,"PageSize":50,"RetrieveExactRowCount":true,"SortExpression":null,"UseCache":false,"SessionId":null}};
 		break;
 		
 		default:
 		//CREATE
-		return {"dataBaseInfo":{"AllowAdditions":true,"AllowDeletions":true,"AllowEdits":true,"DataEntry":false,"DoNotPrefetchImages":false,"InitialPage":"0","SelectCommand":tableName,"FetchSchema":false,"NewImageStorage":true},"updateRecord":{"Paging":{"FirstRow":0,"PageSize":50,"RetrieveExactRowCount":false,"UseCache":true,"SessionId":null,"CacheCommands":0,"Filter":null,"RowKey":0,"TotalRows":3},"ReturnDataMacroIds":false}};
+		return {"dataBaseInfo":{"AllowAdditions":true,"AllowDeletions":true,"AllowEdits":true,"DataEntry":false,"DoNotPrefetchImages":false,"InitialPage":"0","SelectCommand":tableName,"FetchSchema":true,"NewImageStorage":true},"updateRecord":{"Paging":{"FirstRow":0,"PageSize":50,"RetrieveExactRowCount":true,"UseCache":true,"SessionId":null,"CacheCommands":0,"Filter":null,"RowKey":0,"TotalRows":0},"ReturnDataMacroIds":false}};
 		break;
 	}
 };
 // CREATE
 spcrud.accCreate = function($http, tableName, values, fields) {
     var data = spcrud.accDB(tableName, 'create');
-	data.updateRecord.NewValues = values;
+	data.updateRecord.NewValues = [values];
 	data.dataBaseInfo.FieldNames = fields;
     var config = {
         method: 'POST',
@@ -402,7 +402,7 @@ spcrud.accRead = function($http, tableName) {
     };
     return $http(config);
 };
-spcrud.accReadItem = function($http, tableName, id) {
+spcrud.accReadID = function($http, tableName, id) {
 	var data = spcrud.accDB(tableName, 'read');
 	data.dataBaseInfo.Restriction = "<Expression xmlns='http://schemas.microsoft.com/office/accessservices/2010/12/application'><FunctionCall Name='='><Identifier Name='ID' Index= '0' /><StringLiteral Value='"+ id +"' Index='1' /></FunctionCall></Expression>";
     var config = {
@@ -414,12 +414,11 @@ spcrud.accReadItem = function($http, tableName, id) {
     return $http(config);
 };
 // UPDATE
-spcrud.accUpdate = function($http, tableName, id, values) {
-	values.unshift(id);
-    var data = spcrud.accDB(tableName);
-	data.updateRecord = {
-		OriginalValues : values
-	};
+spcrud.accUpdate = function($http, tableName, values, fields) {
+    var data = spcrud.accDB(tableName, 'update');
+	data.updateRecord.OriginalValues = [values];
+	data.updateRecord.NewValues = [values];
+	data.dataBaseInfo.FieldNames = fields;
     var config = {
         method: 'POST',
         url: spcrud.accUrl.replace('GetData','UpdateRecords'),
@@ -430,15 +429,20 @@ spcrud.accUpdate = function($http, tableName, id, values) {
 };
 // DELETE
 spcrud.accDelete = function($http, tableName, id) {
-	var data = spcrud.accDB(tableName);
-	data.updateRecord = {
-		OriginalValues : [id]
-	};
-    var config = {
-        method: 'POST',
-        url: spcrud.accUrl.replace('GetData','DeleteRecords'),
-        headers: spcrud.headers,
-		data: data
-    };
-    return $http(config);
+
+	return spcrud.accReadID($http, tableName, id).then(function(response) {
+		var data = spcrud.accDB(tableName, 'delete');
+		data.dataBaseInfo.FieldNames = [];
+		angular.forEach(response.data.d.Result.Fields, function (f) {
+			data.dataBaseInfo.FieldNames.push(f.ColumnName);
+		});
+		data.updateRecord.OriginalValues = response.data.d.Result.Values;
+	    var config = {
+	        method: 'POST',
+	        url: spcrud.accUrl.replace('GetData','DeleteRecords'),
+	        headers: spcrud.headers,
+			data: data
+	    };
+	    return $http(config);
+	});
 };

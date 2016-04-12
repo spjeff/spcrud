@@ -71,11 +71,12 @@ function spcrudCtl($scope, $http) {
     vm.accCreate = function() {
     	spcrud.setBaseUrl(_spPageContextInfo.webAbsoluteUrl + vm.accSubweb);
     	spcrud.refreshDigest($http).then(function() {
-	    	spcrud.accCreate($http, vm.accTable, [[null, "111", "john smith"]], ["ID","Employee Number","First Name"]).then(function (response) {
+	    	spcrud.accCreate($http, vm.accTable, [null, "222", "john smith"], ["ID","Employee Number","First Name"]).then(function (response) {
 	            //response
 	            console.log('accCreate');
 	            console.log(response);
 	            vm.accResult = JSON.stringify(response.data.d.Result.Values);
+   	            vm.accId = response.data.d.Result.Values[0][0];
 	        });
         });
     };
@@ -93,12 +94,27 @@ function spcrudCtl($scope, $http) {
 	        });
         });
     };
+    
+    //READ
+    vm.accReadID = function() {
+    	spcrud.setBaseUrl(_spPageContextInfo.webAbsoluteUrl + vm.accSubweb);
+    	spcrud.refreshDigest($http).then(function() {
+	    	spcrud.accReadID($http, vm.accTable, vm.accId).then(function (response) {
+	            //response
+	            console.log('accReadID');
+	            console.log(response);
+	            vm.accResult = JSON.stringify(response.data.d.Result.Values);
+	            vm.accId = response.data.d.Result.Values[0][0];
+	        });
+        });
+    };
+
 
 	//UPDATE
     vm.accUpdate = function() {
    		spcrud.setBaseUrl(_spPageContextInfo.webAbsoluteUrl + vm.accSubweb);
     	spcrud.refreshDigest($http).then(function() {
-	    	spcrud.accUpdate($http, vm.accTable, vm.id, ["222","john update"]).then(function (response) {
+	    	spcrud.accUpdate($http, vm.accTable, [vm.accId, "111","john update"], ["ID","Employee Number","First Name"]).then(function (response) {
 	            //response
 	            console.log('accUpdate');
 	            console.log(response);
@@ -111,7 +127,7 @@ function spcrudCtl($scope, $http) {
     vm.accDelete = function() {
    		spcrud.setBaseUrl(_spPageContextInfo.webAbsoluteUrl + vm.accSubweb);
     	spcrud.refreshDigest($http).then(function() {
-	    	spcrud.accDelete($http, vm.accTable, vm.id).then(function (response) {
+	    	spcrud.accDelete($http, vm.accTable, vm.accId).then(function (response) {
 	            //response
 	            console.log('accDel');
 	            console.log(response);
