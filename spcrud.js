@@ -19,8 +19,8 @@
  * spjeff@spjeff.com
  * http://spjeff.com
  *
- * version 0.1.4
- * last updated 04-11-2016
+ * version 0.1.5
+ * last updated 04-12-2016
  *
  * BETA - MS Access Web Database "acc*" methods
  *
@@ -35,7 +35,7 @@ var spcrud = spcrud || {};
 spcrud.init = function() {
     //default to local web URL
     spcrud.apiUrl = spcrud.baseUrl + '/_api/web/lists/GetByTitle(\'{0}\')/items';
-	spcrud.accUrl = spcrud.baseUrl + '/_vti_bin/accsvc/accessportal.json/GetData';
+    spcrud.accUrl = spcrud.baseUrl + '/_vti_bin/accsvc/accessportal.json/GetData';
 
     //globals
     spcrud.jsonHeader = 'application/json;odata=verbose';
@@ -67,7 +67,7 @@ spcrud.setBaseUrl = function(webUrl) {
 };
 spcrud.setBaseUrl();
 
-//string helper function - endsWith()
+//string ends with
 spcrud.endsWith = function(str, suffix) {
     return str.indexOf(suffix, str.length - suffix.length) !== -1;
 };
@@ -88,26 +88,34 @@ spcrud.refreshDigest = function($http) {
 
 //lookup SharePoint current web user
 spcrud.getCurrentUser = function($http) {
-    var url = spcrud.baseUrl + '/_api/web/currentuser?$expand=Groups';
-    var config = {
-        method: 'GET',
-        url: url,
-        cache: true,
-        headers: spcrud.headers
-    };
-    return $http(config);
+	if !(spcrud.currentUser) {
+		var url = spcrud.baseUrl + '/_api/web/currentuser?$expand=Groups';
+		var config = {
+			method: 'GET',
+			url: url,
+			cache: true,
+			headers: spcrud.headers
+		};
+		return $http(config);
+	} else {
+		return {then : function(a) {a();}};
+	}
 };
 
 //lookup my SharePoint profile
 spcrud.getMyProfile = function($http) {
-    var url = spcrud.baseUrl + '/_api/SP.UserProfiles.PeopleManager/GetMyProperties?select=*';
-    var config = {
-        method: 'GET',
-        url: url,
-        cache: true,
-        headers: spcrud.headers
-    };
-    return $http(config);
+	if (!spcrud.myProfile) {
+		var url = spcrud.baseUrl + '/_api/SP.UserProfiles.PeopleManager/GetMyProperties?select=*';
+		var config = {
+			method: 'GET',
+			url: url,
+			cache: true,
+			headers: spcrud.headers
+		};
+		return $http(config);
+	} else {
+		return {then : function(a) {a();}};
+	}
 };
 
 //lookup any SharePoint profile
@@ -159,7 +167,7 @@ spcrud.uploadFile = function($http, folderUrl, fileUrl, binary) {
     return $http(config);
 };
 
-//upload file to folder
+//upload attachment to item
 spcrud.uploadAttach = function($http, listName, id, fileName, binary) {
     var url = spcrud.baseUrl + '/_api/web/lists/GetByTitle(\'' + listName + '\')/items(' + id + ')/AttachmentFiles/add(FileName=\'' + fileName + '\')';
     var config = {
@@ -171,8 +179,7 @@ spcrud.uploadAttach = function($http, listName, id, fileName, binary) {
     return $http(config);
 };
 
-
-//upload file to folder
+//get attachment for item
 spcrud.getAttach = function($http, listName, id) {
     var url = spcrud.baseUrl + '/_api/web/lists/GetByTitle(\'' + listName + '\')/items(' + id + ')/AttachmentFiles';
     var config = {
@@ -183,24 +190,9 @@ spcrud.getAttach = function($http, listName, id) {
     return $http(config);
 };
 
-//misc use for any URL call
-spcrud.misc = function($http, method, apiUrl, data) {
-    //example
-    //method : POST
-    //apiUrl : /_api/web/contextinfo
-    var url = spcrud.baseUrl + apiUrl;
-    var config = {
-        method: method,
-        url: url,
-        headers: spcrud.headers,
-        data: data
-    };
-    return $http(config);
-};
+//----------SHAREPOINT LIST CORE----------
 
-//----------CORE----------
-
-//CREATE item - needs $http factory, SharePoint list name, and JS object to stringify for save
+//CREATE item - SharePoint list name, and JS object to stringify for save
 spcrud.create = function($http, listName, jsonBody) {
     //append metadata
     if (!jsonBody['__metadata']) {
@@ -209,7 +201,6 @@ spcrud.create = function($http, listName, jsonBody) {
         };
     }
     var data = angular.toJson(jsonBody);
-
     var config = {
         method: 'POST',
         url: spcrud.apiUrl.replace('{0}', listName),
@@ -252,7 +243,7 @@ spcrud.read = function($http, listName, filter, selectt, orderby, expand, top, s
     return $http(config);
 };
 
-//READ single item - needs $http factory, SharePoint list name, and item ID number
+//READ single item - SharePoint list name, and item ID number
 spcrud.readItem = function($http, listName, id) {
     var config = {
         method: 'GET',
@@ -262,7 +253,7 @@ spcrud.readItem = function($http, listName, id) {
     return $http(config);
 };
 
-//UPDATE item - needs $http factory, SharePoint list name, item ID number, and JS object to stringify for save
+//UPDATE item - SharePoint list name, item ID number, and JS object to stringify for save
 spcrud.update = function($http, listName, id, jsonBody) {
     //append HTTP header MERGE for UPDATE scenario
     var headers = JSON.parse(JSON.stringify(spcrud.headers));
@@ -276,7 +267,6 @@ spcrud.update = function($http, listName, id, jsonBody) {
         };
     }
     var data = angular.toJson(jsonBody);
-
     var config = {
         method: 'POST',
         url: spcrud.apiUrl.replace('{0}', listName) + '(' + id + ')',
@@ -286,13 +276,12 @@ spcrud.update = function($http, listName, id, jsonBody) {
     return $http(config);
 };
 
-//DELETE item - needs $http factory, SharePoint list name and item ID number
+//DELETE item - SharePoint list name and item ID number
 spcrud.del = function($http, listName, id) {
     //append HTTP header DELETE for DELETE scenario
     var headers = JSON.parse(JSON.stringify(spcrud.headers));
     headers['X-HTTP-Method'] = 'DELETE';
     headers['If-Match'] = '*';
-
     var config = {
         method: 'POST',
         url: spcrud.apiUrl.replace('{0}', listName) + '(' + id + ')',
@@ -301,7 +290,7 @@ spcrud.del = function($http, listName, id) {
     return $http(config);
 };
 
-//JSON blob read from SharePoint list - needs $http factory and SharePoint list name
+//JSON blob read from SharePoint list - SharePoint list name
 spcrud.jsonRead = function($http, listName, cache) {
     return spcrud.getCurrentUser($http).then(function(response) {
         //GET SharePoint Current User
@@ -341,7 +330,7 @@ spcrud.jsonRead = function($http, listName, cache) {
     });
 };
 
-//JSON blob upsert write to SharePoint list - needs $http factory, SharePoint list name, and JS object to stringify for save
+//JSON blob upsert write to SharePoint list - SharePoint list name and JS object to stringify for save
 spcrud.jsonWrite = function($http, listName, jsonBody) {
     return spcrud.refreshDigest($http).then(function(response) {
         return spcrud.jsonRead($http, listName).then(function(item) {
@@ -365,84 +354,65 @@ spcrud.jsonWrite = function($http, listName, jsonBody) {
     });
 };
 
-// Access Web Database 
-spcrud.accDB = function (tableName, method) {
-	switch (method) {
-		case 'read':
+//----------ACCESS WEB DATABASE----------
+
+//helper functions
+spcrud.accBody = function (table, isRead) {
+	if (isRead) {
 		//READ
-		return {"dataBaseInfo":{"AllowAdditions":true,"AllowDeletions":true,"AllowEdits":true,"DataEntry":false,"DoNotPrefetchImages":false,"InitialPage":"0","SelectCommand":tableName,"FetchSchema":true,"NewImageStorage":true},"pagingInfo":{"FirstRow":0,"PageSize":50,"RetrieveExactRowCount":true,"SortExpression":null,"UseCache":false,"SessionId":null}};
-		break;
-		
-		default:
-		//CREATE
-		return {"dataBaseInfo":{"AllowAdditions":true,"AllowDeletions":true,"AllowEdits":true,"DataEntry":false,"DoNotPrefetchImages":false,"InitialPage":"0","SelectCommand":tableName,"FetchSchema":true,"NewImageStorage":true},"updateRecord":{"Paging":{"FirstRow":0,"PageSize":50,"RetrieveExactRowCount":true,"UseCache":true,"SessionId":null,"CacheCommands":0,"Filter":null,"RowKey":0,"TotalRows":0},"ReturnDataMacroIds":false}};
-		break;
+		return {"dataBaseInfo":{"AllowAdditions":true,"AllowDeletions":true,"AllowEdits":true,"DataEntry":false,"DoNotPrefetchImages":false,"InitialPage":"0","SelectCommand":table,"FetchSchema":true,"NewImageStorage":true},"pagingInfo":{"FirstRow":0,"PageSize":50,"RetrieveExactRowCount":true,"SortExpression":null,"UseCache":false,"SessionId":null}};
+	} else {
+		//WRITE
+		return {"dataBaseInfo":{"AllowAdditions":true,"AllowDeletions":true,"AllowEdits":true,"DataEntry":false,"DoNotPrefetchImages":false,"InitialPage":"0","SelectCommand":table,"FetchSchema":true,"NewImageStorage":true},"updateRecord":{"Paging":{"FirstRow":0,"PageSize":50,"RetrieveExactRowCount":true,"UseCache":true,"SessionId":null,"CacheCommands":0,"Filter":null,"RowKey":0,"TotalRows":0},"ReturnDataMacroIds":false}};
 	}
 };
-// CREATE
-spcrud.accCreate = function($http, tableName, values, fields) {
-    var data = spcrud.accDB(tableName, 'create');
+spcrud.accWorker = function ($http, data, stem) {
+	var url = (stem) ? spcrud.accUrl.replace('GetData', stem) : spcrud.accUrl;
+	var config = {
+        method: 'POST',
+        url: url,
+        headers: spcrud.headers,
+		data: data
+    };
+    return $http(config);
+}
+// CREATE row - SQL Azure table name, values[], and fields[] arrays
+spcrud.accCreate = function($http, table, values, fields) {
+    var data = spcrud.accBody(table);
 	data.updateRecord.NewValues = [values];
 	data.dataBaseInfo.FieldNames = fields;
-    var config = {
-        method: 'POST',
-        url: spcrud.accUrl.replace('GetData','InsertRecords'),
-        headers: spcrud.headers,
-		data: data
-    };
-    return $http(config);
+	return spcrud.accWorker($http, data, 'InsertRecords');
 };
-// READ
-spcrud.accRead = function($http, tableName) {
-    var config = {
-        method: 'POST',
-        url: spcrud.accUrl,
-        headers: spcrud.headers,
-		data: spcrud.accDB(tableName, 'read')
-    };
-    return $http(config);
+// READ all - SQL Azure table name
+spcrud.accRead = function($http, table) {
+    var data = spcrud.accBody(table, true);
+	data.updateRecord.NewValues = [values];
+	data.dataBaseInfo.FieldNames = fields;
+	return spcrud.accWorker($http, data);
 };
-spcrud.accReadID = function($http, tableName, id) {
-	var data = spcrud.accDB(tableName, 'read');
-	data.dataBaseInfo.Restriction = "<Expression xmlns='http://schemas.microsoft.com/office/accessservices/2010/12/application'><FunctionCall Name='='><Identifier Name='ID' Index= '0' /><StringLiteral Value='"+ id +"' Index='1' /></FunctionCall></Expression>";
-    var config = {
-        method: 'POST',
-        url: spcrud.accUrl,
-        headers: spcrud.headers,
-		data: data
-    };
-    return $http(config);
+// READ row - SQL Azure table name and ID#
+spcrud.accReadID = function($http, table, id) {
+	var data = spcrud.accBody(table, true);
+	data.dataBaseInfo.Restriction = "<Expression xmlns='http://schemas.microsoft.com/office/accessservices/2010/12/application'><FunctionCall Name='='><Identifier Name='ID' Index= '0' /><StringLiteral Value='" + id + "' Index='1' /></FunctionCall></Expression>";
+    return spcrud.accWorker($http, data);
 };
-// UPDATE
-spcrud.accUpdate = function($http, tableName, values, fields) {
-    var data = spcrud.accDB(tableName, 'update');
+// UPDATE row - SQL Azure table name, values[], and fields[] arrays
+spcrud.accUpdate = function($http, table, values, fields) {
+    var data = spcrud.accBody(table);
 	data.updateRecord.OriginalValues = [values];
 	data.updateRecord.NewValues = [values];
 	data.dataBaseInfo.FieldNames = fields;
-    var config = {
-        method: 'POST',
-        url: spcrud.accUrl.replace('GetData','UpdateRecords'),
-        headers: spcrud.headers,
-		data: data
-    };
-    return $http(config);
+    return spcrud.accWorker($http, data, 'UpdateRecords');
 };
-// DELETE
-spcrud.accDelete = function($http, tableName, id) {
-
-	return spcrud.accReadID($http, tableName, id).then(function(response) {
-		var data = spcrud.accDB(tableName, 'delete');
+// DELETE row - SQL Azure table name and ID#
+spcrud.accDelete = function($http, table, id) {
+	return spcrud.accReadID($http, table, id).then(function(response) {
+		var data = spcrud.accBody(table);
 		data.dataBaseInfo.FieldNames = [];
 		angular.forEach(response.data.d.Result.Fields, function (f) {
 			data.dataBaseInfo.FieldNames.push(f.ColumnName);
 		});
 		data.updateRecord.OriginalValues = response.data.d.Result.Values;
-	    var config = {
-	        method: 'POST',
-	        url: spcrud.accUrl.replace('GetData','DeleteRecords'),
-	        headers: spcrud.headers,
-			data: data
-	    };
-	    return $http(config);
+		return spcrud.accWorker($http, data, 'DeleteRecords');
 	});
 };
