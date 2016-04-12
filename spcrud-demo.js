@@ -5,6 +5,8 @@ function spcrudCtl($scope, $http) {
     var vm = $scope;
     vm.status = 'OK';
     vm.listName = 'Test';
+    vm.accTable = 'Employees';
+    vm.accSubweb = '/Timesheet';
 
     //click events
     vm.create = function () {
@@ -41,6 +43,7 @@ function spcrudCtl($scope, $http) {
         vm.status = operation + ' complete ' + (new Date()).toTimeString();
     };
 
+    //==========
     //JSON blob read
     vm.settingsRead = function () {
         spcrud.jsonRead($http, 'Test').then(function (item) {
@@ -59,6 +62,61 @@ function spcrudCtl($scope, $http) {
             //response
             console.log('settingsWrite');
             console.log(response);
+        });
+    };
+    
+    //==========
+    //ACCDW
+    //CREATE
+    vm.accCreate = function() {
+    	spcrud.setBaseUrl(_spPageContextInfo.webAbsoluteUrl + vm.accSubweb);
+    	spcrud.refreshDigest($http).then(function() {
+	    	spcrud.accCreate($http, vm.accTable, [[null, "111", "john smith"]], ["ID","Employee Number","First Name"]).then(function (response) {
+	            //response
+	            console.log('accCreate');
+	            console.log(response);
+	            vm.accResult = JSON.stringify(response.data.d.Result.Values);
+	        });
+        });
+    };
+    
+    //READ
+    vm.accRead = function() {
+    	spcrud.setBaseUrl(_spPageContextInfo.webAbsoluteUrl + vm.accSubweb);
+    	spcrud.refreshDigest($http).then(function() {
+	    	spcrud.accRead($http, vm.accTable).then(function (response) {
+	            //response
+	            console.log('accRead');
+	            console.log(response);
+	            vm.accResult = JSON.stringify(response.data.d.Result.Values);
+	            vm.accId = response.data.d.Result.Values[0][0];
+	        });
+        });
+    };
+
+	//UPDATE
+    vm.accUpdate = function() {
+   		spcrud.setBaseUrl(_spPageContextInfo.webAbsoluteUrl + vm.accSubweb);
+    	spcrud.refreshDigest($http).then(function() {
+	    	spcrud.accUpdate($http, vm.accTable, vm.id, ["222","john update"]).then(function (response) {
+	            //response
+	            console.log('accUpdate');
+	            console.log(response);
+	            vm.accResult = JSON.stringify(response.data.d.Result.Values);
+	        });
+        });
+    };
+
+	//DELETE
+    vm.accDelete = function() {
+   		spcrud.setBaseUrl(_spPageContextInfo.webAbsoluteUrl + vm.accSubweb);
+    	spcrud.refreshDigest($http).then(function() {
+	    	spcrud.accDelete($http, vm.accTable, vm.id).then(function (response) {
+	            //response
+	            console.log('accDel');
+	            console.log(response);
+	            vm.accResult = JSON.stringify(response.data.d.Result.Values);
+	        });
         });
     };
 }

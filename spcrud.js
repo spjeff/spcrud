@@ -35,7 +35,7 @@ var spcrud = spcrud || {};
 spcrud.init = function() {
     //default to local web URL
     spcrud.apiUrl = spcrud.baseUrl + '/_api/web/lists/GetByTitle(\'{0}\')/items';
-	spcrud.accUrl = spcrud.baseUrl + '/_vti_bin/accsrv/accessportal.json/GetData';
+	spcrud.accUrl = spcrud.baseUrl + '/_vti_bin/accsvc/accessportal.json/GetData';
 
     //globals
     spcrud.jsonHeader = 'application/json;odata=verbose';
@@ -76,7 +76,7 @@ spcrud.endsWith = function(str, suffix) {
 spcrud.refreshDigest = function($http) {
     var config = {
         method: 'POST',
-        url: spcrud.baseUrl + '/_api/contextinfo',
+        url:  spcrud.baseUrl + '/_api/contextinfo',
         headers: spcrud.headers
     };
     return $http(config).then(function(response) {
@@ -366,12 +366,24 @@ spcrud.jsonWrite = function($http, listName, jsonBody) {
 };
 
 // Access Web Database 
+spcrud.accDB = function (tableName, method) {
+	switch (method) {
+		case 'read':
+		//READ
+		return {"dataBaseInfo":{"AllowAdditions":true,"AllowDeletions":true,"AllowEdits":true,"DataEntry":false,"DoNotPrefetchImages":false,"InitialPage":"0","SelectCommand":tableName,"FetchSchema":false,"NewImageStorage":true},"pagingInfo":{"FirstRow":0,"PageSize":50,"RetrieveExactRowCount":true,"SortExpression":null,"UseCache":false,"SessionId":null}};
+		break;
+		
+		default:
+		//CREATE
+		return {"dataBaseInfo":{"AllowAdditions":true,"AllowDeletions":true,"AllowEdits":true,"DataEntry":false,"DoNotPrefetchImages":false,"InitialPage":"0","SelectCommand":tableName,"FetchSchema":false,"NewImageStorage":true},"updateRecord":{"Paging":{"FirstRow":0,"PageSize":50,"RetrieveExactRowCount":false,"UseCache":true,"SessionId":null,"CacheCommands":0,"Filter":null,"RowKey":0,"TotalRows":3},"ReturnDataMacroIds":false}};
+		break;
+	}
+};
 // CREATE
-spcrud.accCreate = function($http, tableName, values) {
-    var data = spcrud.accDB(tableName);
-	data.updateRecord = {
-		NewValues : values
-	};
+spcrud.accCreate = function($http, tableName, values, fields) {
+    var data = spcrud.accDB(tableName, 'create');
+	data.updateRecord.NewValues = values;
+	data.dataBaseInfo.FieldNames = fields;
     var config = {
         method: 'POST',
         url: spcrud.accUrl.replace('GetData','InsertRecords'),
@@ -381,20 +393,17 @@ spcrud.accCreate = function($http, tableName, values) {
     return $http(config);
 };
 // READ
-spcrud.accDB = function (tableName) {
-	return {"dataBaseInfo":{"AllowAdditions":true,"AllowDeletions":true,"AllowEdits":true,"DataEntry":false,"DoNotPrefetchImages":false,"InitialPage":"0","SelectCommand":tableName,"FetchSchema":false,"NewImageStorage":true},"pagingInfo":{"FirstRow":0,"PageSize":50,"RetrieveExactRowCount":false,"UseCache":false,"SessionId":null}};
-};
 spcrud.accRead = function($http, tableName) {
     var config = {
         method: 'POST',
         url: spcrud.accUrl,
         headers: spcrud.headers,
-		data: spcrud.accDB(tableName)
+		data: spcrud.accDB(tableName, 'read')
     };
     return $http(config);
 };
 spcrud.accReadItem = function($http, tableName, id) {
-	var data = spcrud.accDB(tableName);
+	var data = spcrud.accDB(tableName, 'read');
 	data.dataBaseInfo.Restriction = "<Expression xmlns='http://schemas.microsoft.com/office/accessservices/2010/12/application'><FunctionCall Name='='><Identifier Name='ID' Index= '0' /><StringLiteral Value='"+ id +"' Index='1' /></FunctionCall></Expression>";
     var config = {
         method: 'POST',
