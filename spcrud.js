@@ -19,7 +19,7 @@
  * spjeff@spjeff.com
  * http://spjeff.com
  *
- * version 0.1.5
+ * version 0.1.6
  * last updated 04-13-2016
  *
  * BETA - MS Access Web Database "acc*" methods
@@ -211,27 +211,27 @@ spcrud.create = function($http, listName, jsonBody) {
 };
 
 //READ entire list - needs $http factory and SharePoint list name
-spcrud.read = function($http, listName, filter, selectt, orderby, expand, top, skip) {
+spcrud.read = function($http, listName, options) {
     //build URL syntax
     //https://msdn.microsoft.com/en-us/library/office/fp142385.aspx#bk_support
     var url = spcrud.apiUrl.replace('{0}', listName);
-    if (filter) {
-        url += ((spcrud.endsWith(url, 'items')) ? "?" : "&") + "$filter=" + filter;
+    if (options.filter) {
+        url += ((spcrud.endsWith(url, 'items')) ? "?" : "&") + "$filter=" + options.filter;
     }
-    if (selectt) {
-        url += ((spcrud.endsWith(url, 'items')) ? "?" : "&") + "$select=" + selectt;
+    if (options.select) {
+        url += ((spcrud.endsWith(url, 'items')) ? "?" : "&") + "$select=" + options.select;
     }
-    if (orderby) {
-        url += ((spcrud.endsWith(url, 'items')) ? "?" : "&") + "$orderby=" + orderby;
+    if (options.orderby) {
+        url += ((spcrud.endsWith(url, 'items')) ? "?" : "&") + "$orderby=" + options.orderby;
     }
-    if (expand) {
-        url += ((spcrud.endsWith(url, 'items')) ? "?" : "&") + "$expand=" + expand;
+    if (options.expand) {
+        url += ((spcrud.endsWith(url, 'items')) ? "?" : "&") + "$expand=" + options.expand;
     }
-    if (top) {
-        url += ((spcrud.endsWith(url, 'items')) ? "?" : "&") + "$top=" + top;
+    if (options.top) {
+        url += ((spcrud.endsWith(url, 'items')) ? "?" : "&") + "$top=" + options.top;
     }
-    if (skip) {
-        url += ((spcrud.endsWith(url, 'items')) ? "?" : "&") + "$skip=" + skip;
+    if (options.skip) {
+        url += ((spcrud.endsWith(url, 'items')) ? "?" : "&") + "$skip=" + options.skip;
     }
     
     //config
@@ -386,8 +386,6 @@ spcrud.accCreate = function($http, table, values, fields) {
 // READ all - SQL Azure table name
 spcrud.accRead = function($http, table) {
     var data = spcrud.accBody(table, true);
-    data.updateRecord.NewValues = [values];
-    data.dataBaseInfo.FieldNames = fields;
     return spcrud.accWorker($http, data);
 };
 // READ row - SQL Azure table name and ID#
