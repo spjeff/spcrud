@@ -19,8 +19,8 @@
  * spjeff@spjeff.com
  * http://spjeff.com
  *
- * version 0.1.6
- * last updated 04-13-2016
+ * version 0.1.7
+ * last updated 04-20-2016
  *
  * BETA - MS Access Web Database "acc*" methods
  *
@@ -168,12 +168,23 @@ spcrud.uploadFile = function($http, folderUrl, fileUrl, binary) {
 };
 
 //upload attachment to item
-spcrud.uploadAttach = function($http, listName, id, fileName, binary) {
-    var url = spcrud.baseUrl + '/_api/web/lists/GetByTitle(\'' + listName + '\')/items(' + id + ')/AttachmentFiles/add(FileName=\'' + fileName + '\')';
+spcrud.uploadAttach = function($http, listName, id, fileName, binary, overwrite) {
+    var url = spcrud.baseUrl + '/_api/web/lists/GetByTitle(\'' + listName + '\')/items(' + id;
+    var headers = JSON.parse(JSON.stringify(spcrud.headers));
+    
+    if (overwrite) {
+        //append HTTP header PUT for UPDATE scenario
+        headers['X-HTTP-Method'] = 'PUT';
+        url = ')/AttachmentFiles(\'' + fileName + '\)/$value';
+    } else {
+        //CREATE scenario
+        url += + ')/AttachmentFiles/add(FileName=\'' + fileName + '\')';
+    }
+    
     var config = {
         method: 'POST',
         url: url,
-        headers: spcrud.headers,
+        headers: headers,
         data: binary
     };
     return $http(config);
