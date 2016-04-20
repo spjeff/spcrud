@@ -175,7 +175,7 @@ spcrud.uploadAttach = function($http, listName, id, fileName, binary, overwrite)
     if (overwrite) {
         //append HTTP header PUT for UPDATE scenario
         headers['X-HTTP-Method'] = 'PUT';
-        url = ')/AttachmentFiles(\'' + fileName + '\)/$value';
+        url += ')/AttachmentFiles(\'' + fileName + '\)/$value';
     } else {
         //CREATE scenario
         url += + ')/AttachmentFiles/add(FileName=\'' + fileName + '\')';
