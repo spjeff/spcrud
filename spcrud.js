@@ -19,10 +19,8 @@
  * spjeff@spjeff.com
  * http://spjeff.com
  *
- * version 0.1.7
- * last updated 04-20-2016
- *
- * BETA - MS Access Web Database "acc*" methods
+ * version 0.1.8
+ * last updated 05-04-2016
  *
  */
 
