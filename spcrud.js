@@ -201,6 +201,27 @@ spcrud.getAttach = function($http, listName, id) {
     return $http(config);
 };
 
+//send email
+spcrud.sendMail = function($http, to, ffrom, subj, body) {
+	//append metadata
+	to = to.split(",");
+	var recip = (to instanceof Array) ? to : [to];
+	var message = {
+		'__metadata': { 'type': 'SP.Utilities.EmailProperties' },
+		'To': { 'results': recip },
+		'From': ffrom,
+		'Subject': subj,
+		'Body': body
+	};
+    var config = {
+        method: 'POST',
+        url: spcrud.baseUrl + '/_api/SP.Utilities.Utility.SendEmail',
+        headers: spcrud.headers,
+		data: angular.toJson(message)
+    };
+    return $http(config);
+};
+
 //----------SHAREPOINT LIST CORE----------
 
 //CREATE item - SharePoint list name, and JS object to stringify for save
