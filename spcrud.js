@@ -19,8 +19,8 @@
  * spjeff@spjeff.com
  * http://spjeff.com
  *
- * version 0.1.8
- * last updated 05-04-2016
+ * version 0.1.9
+ * last updated 05-13-2016
  *
  */
 
@@ -205,11 +205,13 @@ spcrud.sendMail = function($http, to, ffrom, subj, body) {
 	to = to.split(",");
 	var recip = (to instanceof Array) ? to : [to];
 	var message = {
-		'__metadata': { 'type': 'SP.Utilities.EmailProperties' },
-		'To': { 'results': recip },
-		'From': ffrom,
-		'Subject': subj,
-		'Body': body
+		'properties' : {
+			'__metadata': { 'type': 'SP.Utilities.EmailProperties' },
+			'To': { 'results': recip },
+			'From': ffrom,
+			'Subject': subj,
+			'Body': body
+		}
 	};
     var config = {
         method: 'POST',
