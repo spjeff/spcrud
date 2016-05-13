@@ -11,7 +11,7 @@
 <div ng-app="spcrudApp">
     <div ng-controller="spcrudCtl">
 
-        <br/>
+        <!-- SharePoint List -->
         <h2>SPCRUD demo - SharePoint List Create/Read/Update/Delete</h2>
         <hr/>
         <p>
@@ -28,6 +28,7 @@
         </p>
         <br/>
       
+        <!-- JSON blob -->
 		<h2>JSON blob Read/Write</h2>
 	    <hr/>	
 	    <p>
@@ -37,6 +38,22 @@
         </p>
         <br/>
 
+        <!-- Send Mail -->
+		<h2>Send Mail</h2>
+	    <hr/>	
+	    <p>
+	    	To:<input type="text" ng-model="mailTo" />
+            From:<input type="text" ng-model="mailFrom" />
+            Subject:<input type="text" ng-model="mailSubj" />
+            Body:<input type="text" ng-model="mailBody" />
+            
+            <input type="button" ng-click="send()" value="Send Mail" />
+            
+	        <textarea rows="4" cols="100" ng-model="mailResult"></textarea>
+        </p>
+        <br/>
+        
+        <!-- Microsoft Access Web Database -->
 		<h2>MS Access ACCDW - SQL Azure CRUD</h2>
 	    <hr/>	
 	    <p>
@@ -58,8 +75,6 @@
             <span ng-bind="accStatus"></span>
         </p>
         <br/>
-
-
 
     </div>
 </div>

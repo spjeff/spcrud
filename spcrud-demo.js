@@ -65,6 +65,17 @@ function spcrudCtl($scope, $http) {
         });
     };
     
+    
+    //==========
+    //SendMail
+    vm.send = function () {
+      vm.mailResult = '';
+      spcrud.sendMail($http, vm.mailTo, vm.mailFrom, vm.mailSubject, vm.mailBody).then(function(resp) {
+          vm.mailResult = angular.toJson(resp);
+      });
+    };
+    
+    
     //==========
     //ACCDW
     //CREATE
