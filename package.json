@@ -24,7 +24,7 @@
     "CRUD"
   ],
   "author": "Jeff Jones <spjeff@spjeff.com> (http://spjeff.com)",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/spjeff/spcrud/issues"
   },
