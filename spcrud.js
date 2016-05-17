@@ -19,8 +19,8 @@
  * spjeff@spjeff.com
  * http://spjeff.com
  *
- * version 0.1.9
- * last updated 05-13-2016
+ * version 0.1.10
+ * last updated 05-17-2016
  *
  */
 
@@ -264,6 +264,9 @@ spcrud.read = function($http, listName, options) {
     }
     if (options.skip) {
         url += ((spcrud.endsWith(url, 'items')) ? "?" : "&") + "$skip=" + options.skip;
+    }
+   if (options.expand) {
+        url += ((spcrud.endsWith(url, 'items')) ? "?" : "&") + "$expand=" + options.expand;
     }
     
     //config
