@@ -19,8 +19,8 @@
  * spjeff@spjeff.com
  * http://spjeff.com
  *
- * version 0.1.10
- * last updated 05-17-2016
+ * version 0.1.11
+ * last updated 05-23-2016
  *
  */
 
@@ -86,7 +86,7 @@ spcrud.refreshDigest = function($http) {
 
 //lookup SharePoint current web user
 spcrud.getCurrentUser = function($http) {
-	if !(spcrud.currentUser) {
+	if (!spcrud.currentUser) {
 		var url = spcrud.baseUrl + '/_api/web/currentuser?$expand=Groups';
 		var config = {
 			method: 'GET',
