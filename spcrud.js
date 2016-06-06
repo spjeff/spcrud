@@ -12,28 +12,28 @@
  *
  * NOTE - 5 and 6 require the target SharePoint List to have two columns: "Title" (indexed) and "JSON" (mult-text).   These are
  * intendend to save JSON objects for JS internal application needs.   For example, saving user preferences to a "JSON-Settings" list
- * where one row is created per user (Title = current user Login) and JSON multi-text field holds the JSON blob.  Simple and flexible way to save data
- * for many scenarios.
+ * where one row is created per user (Title = current user Login) and JSON multi-text field holds the JSON blob.
+ * Simple and flexible way to save data for many scenarios.
  *
  * @spjeff
  * spjeff@spjeff.com
  * http://spjeff.com
  *
- * version 0.1.11
- * last updated 05-23-2016
+ * version 0.1.12
+ * last updated 06-06-2016
  *
  */
 
 //namespace
+'use strict';
 var spcrud = spcrud || {};
 
 //----------SHARED----------
 
 //initialize
-spcrud.init = function() {
+spcrud.init = function () {
     //default to local web URL
     spcrud.apiUrl = spcrud.baseUrl + '/_api/web/lists/GetByTitle(\'{0}\')/items';
-    spcrud.accUrl = spcrud.baseUrl + '/_vti_bin/accsvc/accessportal.json/GetData';
 
     //globals
     spcrud.jsonHeader = 'application/json;odata=verbose';
@@ -51,7 +51,7 @@ spcrud.init = function() {
 };
 
 //change target web URL
-spcrud.setBaseUrl = function(webUrl) {
+spcrud.setBaseUrl = function (webUrl) {
     if (webUrl) {
         //user provided target Web URL
         spcrud.baseUrl = webUrl;
@@ -66,18 +66,18 @@ spcrud.setBaseUrl = function(webUrl) {
 spcrud.setBaseUrl();
 
 //string ends with
-spcrud.endsWith = function(str, suffix) {
+spcrud.endsWith = function (str, suffix) {
     return str.indexOf(suffix, str.length - suffix.length) !== -1;
 };
 
 //digest refresh worker
-spcrud.refreshDigest = function($http) {
+spcrud.refreshDigest = function ($http) {
     var config = {
         method: 'POST',
-        url:  spcrud.baseUrl + '/_api/contextinfo',
+        url: spcrud.baseUrl + '/_api/contextinfo',
         headers: spcrud.headers
     };
-    return $http(config).then(function(response) {
+    return $http(config).then(function (response) {
         //parse JSON and save
         spcrud.headers['X-RequestDigest'] = response.data.d.GetContextWebInformation.FormDigestValue;
     });
@@ -85,100 +85,112 @@ spcrud.refreshDigest = function($http) {
 };
 
 //lookup SharePoint current web user
-spcrud.getCurrentUser = function($http) {
-	if (!spcrud.currentUser) {
-		var url = spcrud.baseUrl + '/_api/web/currentuser?$expand=Groups';
-		var config = {
-			method: 'GET',
-			url: url,
-			cache: true,
-			headers: spcrud.headers
-		};
-		return $http(config);
-	} else {
-		return {then : function(a) {a();}};
-	}
+spcrud.getCurrentUser = function ($http) {
+    if (!spcrud.currentUser) {
+        var url = spcrud.baseUrl + '/_api/web/currentuser?$expand=Groups',
+            config = {
+                method: 'GET',
+                url: url,
+                cache: true,
+                headers: spcrud.headers
+            };
+        return $http(config);
+    } else {
+        return {
+            then: function (a) {
+                a();
+            }
+        };
+    }
 };
 
 //lookup my SharePoint profile
-spcrud.getMyProfile = function($http) {
-	if (!spcrud.myProfile) {
-		var url = spcrud.baseUrl + '/_api/SP.UserProfiles.PeopleManager/GetMyProperties?select=*';
-		var config = {
-			method: 'GET',
-			url: url,
-			cache: true,
-			headers: spcrud.headers
-		};
-		return $http(config);
-	} else {
-		return {then : function(a) {a();}};
-	}
+spcrud.getMyProfile = function ($http) {
+    if (!spcrud.myProfile) {
+        var url = spcrud.baseUrl + '/_api/SP.UserProfiles.PeopleManager/GetMyProperties?select=*',
+            config = {
+                method: 'GET',
+                url: url,
+                cache: true,
+                headers: spcrud.headers
+            };
+        return $http(config);
+    } else {
+        return {
+            then: function (a) {
+                a();
+            }
+        };
+    }
 };
 
 //lookup any SharePoint profile
-spcrud.getProfile = function($http, login) {
-    var url = spcrud.baseUrl + '/_api/SP.UserProfiles.PeopleManager/GetPropertiesFor(accountName=@v)?@v=\'' + login + '\'&select=*';
-    var config = {
-        method: 'GET',
-        url: url,
-        headers: spcrud.headers
-    };
+spcrud.getProfile = function ($http, login) {
+    var url = spcrud.baseUrl + '/_api/SP.UserProfiles.PeopleManager/GetPropertiesFor(accountName=@v)?@v=\'' + login + '\'&select=*',
+        config = {
+            method: 'GET',
+            url: url,
+            headers: spcrud.headers
+        };
     return $http(config);
 };
 
 //ensure SPUser exists in target web
-spcrud.ensureUser = function($http, login) {
-    var url = spcrud.baseUrl + '/_api/web/ensureuser';
-    var config = {
-        method: 'POST',
-        url: url,
-        headers: spcrud.headers,
-        data: login
-    };
+spcrud.ensureUser = function ($http, login) {
+    var url = spcrud.baseUrl + '/_api/web/ensureuser',
+        config = {
+            method: 'POST',
+            url: url,
+            headers: spcrud.headers,
+            data: login
+        };
     return $http(config);
 };
 
 //create folder
-spcrud.createFolder = function($http, folderUrl) {
-    var data = { '__metadata': { 'type': 'SP.Folder' }, 'ServerRelativeUrl': folderUrl };
-
-    var url = spcrud.baseUrl + '/_api/web/folders';
-    var config = {
-        method: 'POST',
-        url: url,
-        headers: spcrud.headers,
-        data: data
-    };
+spcrud.createFolder = function ($http, folderUrl) {
+    var data = {
+            '__metadata': {
+                'type': 'SP.Folder'
+            },
+            'ServerRelativeUrl': folderUrl
+        },
+        url = spcrud.baseUrl + '/_api/web/folders',
+        config = {
+            method: 'POST',
+            url: url,
+            headers: spcrud.headers,
+            data: data
+        };
     return $http(config);
 };
 
 //upload file to folder
-spcrud.uploadFile = function($http, folderUrl, fileUrl, binary) {
-    var url = spcrud.baseUrl + '/_api/web/GetFolderByServerRelativeUrl(\'' + folderUrl + '\')/files/add(overwrite=true, url=\'' + fileUrl + '\')';
-    var config = {
-        method: 'POST',
-        url: url,
-        headers: spcrud.headers,
-        data: binary
-    };
+spcrud.uploadFile = function ($http, folderUrl, fileUrl, binary) {
+    var url = spcrud.baseUrl + '/_api/web/GetFolderByServerRelativeUrl(\'' + folderUrl + '\')/files/add(overwrite=true, url=\'' + fileUrl + '\')',
+        config = {
+            method: 'POST',
+            url: url,
+            headers: spcrud.headers,
+            data: binary
+        };
     return $http(config);
 };
 
 //upload attachment to item
-spcrud.uploadAttach = function($http, listName, id, fileName, binary, overwrite) {
-    var url = spcrud.baseUrl + '/_api/web/lists/GetByTitle(\'' + listName + '\')/items(' + id;
-    var headers = JSON.parse(JSON.stringify(spcrud.headers));
-    
+spcrud.uploadAttach = function ($http, listName, id, fileName, binary, overwrite) {
+    var url = spcrud.baseUrl + '/_api/web/lists/GetByTitle(\'' + listName + '\')/items(' + id,
+        headers = JSON.parse(JSON.stringify(spcrud.headers));
+
     if (overwrite) {
         //append HTTP header PUT for UPDATE scenario
         headers['X-HTTP-Method'] = 'PUT';
-        url += ')/AttachmentFiles(\'' + fileName + '\)/$value';
+        url += ')/AttachmentFiles(\'' + fileName + '\')/$value';
     } else {
         //CREATE scenario
-        url += + ')/AttachmentFiles/add(FileName=\'' + fileName + '\')';
+        url += ')/AttachmentFiles/add(FileName=\'' + fileName + '\')';
     }
-    
+
     var config = {
         method: 'POST',
         url: url,
@@ -189,61 +201,65 @@ spcrud.uploadAttach = function($http, listName, id, fileName, binary, overwrite)
 };
 
 //get attachment for item
-spcrud.getAttach = function($http, listName, id) {
-    var url = spcrud.baseUrl + '/_api/web/lists/GetByTitle(\'' + listName + '\')/items(' + id + ')/AttachmentFiles';
-    var config = {
-        method: 'GET',
-        url: url,
-        headers: spcrud.headers
-    };
+spcrud.getAttach = function ($http, listName, id) {
+    var url = spcrud.baseUrl + '/_api/web/lists/GetByTitle(\'' + listName + '\')/items(' + id + ')/AttachmentFiles',
+        config = {
+            method: 'GET',
+            url: url,
+            headers: spcrud.headers
+        };
     return $http(config);
 };
 
 //send email
-spcrud.sendMail = function($http, to, ffrom, subj, body) {
-	//append metadata
-	to = to.split(",");
-	var recip = (to instanceof Array) ? to : [to];
-	var message = {
-		'properties' : {
-			'__metadata': { 'type': 'SP.Utilities.EmailProperties' },
-			'To': { 'results': recip },
-			'From': ffrom,
-			'Subject': subj,
-			'Body': body
-		}
-	};
-    var config = {
-        method: 'POST',
-        url: spcrud.baseUrl + '/_api/SP.Utilities.Utility.SendEmail',
-        headers: spcrud.headers,
-		data: angular.toJson(message)
-    };
+spcrud.sendMail = function ($http, to, ffrom, subj, body) {
+    //append metadata
+    to = to.split(",");
+    var recip = (to instanceof Array) ? to : [to],
+        message = {
+            'properties': {
+                '__metadata': {
+                    'type': 'SP.Utilities.EmailProperties'
+                },
+                'To': {
+                    'results': recip
+                },
+                'From': ffrom,
+                'Subject': subj,
+                'Body': body
+            }
+        },
+        config = {
+            method: 'POST',
+            url: spcrud.baseUrl + '/_api/SP.Utilities.Utility.SendEmail',
+            headers: spcrud.headers,
+            data: angular.toJson(message)
+        };
     return $http(config);
 };
 
 //----------SHAREPOINT LIST CORE----------
 
 //CREATE item - SharePoint list name, and JS object to stringify for save
-spcrud.create = function($http, listName, jsonBody) {
+spcrud.create = function ($http, listName, jsonBody) {
     //append metadata
     if (!jsonBody['__metadata']) {
         jsonBody['__metadata'] = {
             'type': 'SP.ListItem'
         };
     }
-    var data = angular.toJson(jsonBody);
-    var config = {
-        method: 'POST',
-        url: spcrud.apiUrl.replace('{0}', listName),
-        data: data,
-        headers: spcrud.headers
-    };
+    var data = angular.toJson(jsonBody),
+        config = {
+            method: 'POST',
+            url: spcrud.apiUrl.replace('{0}', listName),
+            data: data,
+            headers: spcrud.headers
+        };
     return $http(config);
 };
 
 //READ entire list - needs $http factory and SharePoint list name
-spcrud.read = function($http, listName, options) {
+spcrud.read = function ($http, listName, options) {
     //build URL syntax
     //https://msdn.microsoft.com/en-us/library/office/fp142385.aspx#bk_support
     var url = spcrud.apiUrl.replace('{0}', listName);
@@ -265,10 +281,10 @@ spcrud.read = function($http, listName, options) {
     if (options.skip) {
         url += ((spcrud.endsWith(url, 'items')) ? "?" : "&") + "$skip=" + options.skip;
     }
-   if (options.expand) {
+    if (options.expand) {
         url += ((spcrud.endsWith(url, 'items')) ? "?" : "&") + "$expand=" + options.expand;
     }
-    
+
     //config
     var config = {
         method: 'GET',
@@ -279,7 +295,7 @@ spcrud.read = function($http, listName, options) {
 };
 
 //READ single item - SharePoint list name, and item ID number
-spcrud.readItem = function($http, listName, id) {
+spcrud.readItem = function ($http, listName, id) {
     var config = {
         method: 'GET',
         url: spcrud.apiUrl.replace('{0}', listName) + '(' + id + ')',
@@ -289,7 +305,7 @@ spcrud.readItem = function($http, listName, id) {
 };
 
 //UPDATE item - SharePoint list name, item ID number, and JS object to stringify for save
-spcrud.update = function($http, listName, id, jsonBody) {
+spcrud.update = function ($http, listName, id, jsonBody) {
     //append HTTP header MERGE for UPDATE scenario
     var headers = JSON.parse(JSON.stringify(spcrud.headers));
     headers['X-HTTP-Method'] = 'MERGE';
@@ -301,18 +317,18 @@ spcrud.update = function($http, listName, id, jsonBody) {
             'type': 'SP.ListItem'
         };
     }
-    var data = angular.toJson(jsonBody);
-    var config = {
-        method: 'POST',
-        url: spcrud.apiUrl.replace('{0}', listName) + '(' + id + ')',
-        data: data,
-        headers: headers
-    };
+    var data = angular.toJson(jsonBody),
+        config = {
+            method: 'POST',
+            url: spcrud.apiUrl.replace('{0}', listName) + '(' + id + ')',
+            data: data,
+            headers: headers
+        };
     return $http(config);
 };
 
 //DELETE item - SharePoint list name and item ID number
-spcrud.del = function($http, listName, id) {
+spcrud.del = function ($http, listName, id) {
     //append HTTP header DELETE for DELETE scenario
     var headers = JSON.parse(JSON.stringify(spcrud.headers));
     headers['X-HTTP-Method'] = 'DELETE';
@@ -326,8 +342,8 @@ spcrud.del = function($http, listName, id) {
 };
 
 //JSON blob read from SharePoint list - SharePoint list name
-spcrud.jsonRead = function($http, listName, cache) {
-    return spcrud.getCurrentUser($http).then(function(response) {
+spcrud.jsonRead = function ($http, listName, cache) {
+    return spcrud.getCurrentUser($http).then(function (response) {
         //GET SharePoint Current User
         spcrud.currentUser = response.data.d;
         spcrud.login = response.data.d.LoginName.toLowerCase();
@@ -350,12 +366,12 @@ spcrud.jsonRead = function($http, listName, cache) {
         };
 
         //GET SharePoint Profile
-        spcrud.getMyProfile($http).then(function(response) {
+        spcrud.getMyProfile($http).then(function (response) {
             spcrud.myProfile = response.data.d;
         });
 
         //parse single SPListItem only
-        return $http(config).then(function(response) {
+        return $http(config).then(function (response) {
             if (response.data.d.results) {
                 return response.data.d.results[0];
             } else {
@@ -366,9 +382,9 @@ spcrud.jsonRead = function($http, listName, cache) {
 };
 
 //JSON blob upsert write to SharePoint list - SharePoint list name and JS object to stringify for save
-spcrud.jsonWrite = function($http, listName, jsonBody) {
-    return spcrud.refreshDigest($http).then(function(response) {
-        return spcrud.jsonRead($http, listName).then(function(item) {
+spcrud.jsonWrite = function ($http, listName, jsonBody) {
+    return spcrud.refreshDigest($http).then(function (response) {
+        return spcrud.jsonRead($http, listName).then(function (item) {
             //HTTP 200 OK
             if (item) {
                 //update if found
@@ -376,7 +392,7 @@ spcrud.jsonWrite = function($http, listName, jsonBody) {
                 return spcrud.update($http, listName, item.Id, item);
             } else {
                 //create if missing
-                var item = {
+                item = {
                     '__metadata': {
                         'type': 'SP.ListItem'
                     },
@@ -386,66 +402,5 @@ spcrud.jsonWrite = function($http, listName, jsonBody) {
                 return spcrud.create($http, listName, item);
             }
         });
-    });
-};
-
-//----------ACCESS WEB DATABASE----------
-
-//helper functions
-spcrud.accBody = function (table, isRead) {
-    if (isRead) {
-        //READ
-        return {"dataBaseInfo":{"AllowAdditions":true,"AllowDeletions":true,"AllowEdits":true,"DataEntry":false,"DoNotPrefetchImages":false,"InitialPage":"0","SelectCommand":table,"FetchSchema":true,"NewImageStorage":true},"pagingInfo":{"FirstRow":0,"PageSize":50,"RetrieveExactRowCount":true,"SortExpression":null,"UseCache":false,"SessionId":null}};
-    } else {
-        //WRITE
-        return {"dataBaseInfo":{"AllowAdditions":true,"AllowDeletions":true,"AllowEdits":true,"DataEntry":false,"DoNotPrefetchImages":false,"InitialPage":"0","SelectCommand":table,"FetchSchema":true,"NewImageStorage":true},"updateRecord":{"Paging":{"FirstRow":0,"PageSize":50,"RetrieveExactRowCount":true,"UseCache":true,"SessionId":null,"CacheCommands":0,"Filter":null,"RowKey":0,"TotalRows":0},"ReturnDataMacroIds":false}};
-    }
-};
-spcrud.accWorker = function ($http, data, stem) {
-    var url = (stem) ? spcrud.accUrl.replace('GetData', stem) : spcrud.accUrl;
-    var config = {
-        method: 'POST',
-        url: url,
-        headers: spcrud.headers,
-        data: data
-    };
-    return $http(config);
-}
-// CREATE row - SQL Azure table name, values[], and fields[] arrays
-spcrud.accCreate = function($http, table, values, fields) {
-    var data = spcrud.accBody(table);
-    data.updateRecord.NewValues = [values];
-    data.dataBaseInfo.FieldNames = fields;
-    return spcrud.accWorker($http, data, 'InsertRecords');
-};
-// READ all - SQL Azure table name
-spcrud.accRead = function($http, table) {
-    var data = spcrud.accBody(table, true);
-    return spcrud.accWorker($http, data);
-};
-// READ row - SQL Azure table name and ID#
-spcrud.accReadID = function($http, table, id) {
-    var data = spcrud.accBody(table, true);
-    data.dataBaseInfo.Restriction = "<Expression xmlns='http://schemas.microsoft.com/office/accessservices/2010/12/application'><FunctionCall Name='='><Identifier Name='ID' Index= '0' /><StringLiteral Value='" + id + "' Index='1' /></FunctionCall></Expression>";
-    return spcrud.accWorker($http, data);
-};
-// UPDATE row - SQL Azure table name, values[], and fields[] arrays
-spcrud.accUpdate = function($http, table, values, fields) {
-    var data = spcrud.accBody(table);
-    data.updateRecord.OriginalValues = [values];
-    data.updateRecord.NewValues = [values];
-    data.dataBaseInfo.FieldNames = fields;
-    return spcrud.accWorker($http, data, 'UpdateRecords');
-};
-// DELETE row - SQL Azure table name and ID#
-spcrud.accDelete = function($http, table, id) {
-    return spcrud.accReadID($http, table, id).then(function(response) {
-        var data = spcrud.accBody(table);
-        data.dataBaseInfo.FieldNames = [];
-        angular.forEach(response.data.d.Result.Fields, function (f) {
-            data.dataBaseInfo.FieldNames.push(f.ColumnName);
-        });
-        data.updateRecord.OriginalValues = response.data.d.Result.Values;
-        return spcrud.accWorker($http, data, 'DeleteRecords');
     });
 };
