@@ -19,8 +19,8 @@
  * spjeff@spjeff.com
  * http://spjeff.com
  *
- * version 0.1.12
- * last updated 06-06-2016
+ * version 0.1.13
+ * last updated 08-01-2016
  *
  */
 
@@ -31,7 +31,7 @@ var spcrud = spcrud || {};
 //----------SHARED----------
 
 //initialize
-spcrud.init = function () {
+spcrud.init = function() {
     //default to local web URL
     spcrud.apiUrl = spcrud.baseUrl + '/_api/web/lists/GetByTitle(\'{0}\')/items';
 
@@ -51,7 +51,7 @@ spcrud.init = function () {
 };
 
 //change target web URL
-spcrud.setBaseUrl = function (webUrl) {
+spcrud.setBaseUrl = function(webUrl) {
     if (webUrl) {
         //user provided target Web URL
         spcrud.baseUrl = webUrl;
@@ -66,18 +66,18 @@ spcrud.setBaseUrl = function (webUrl) {
 spcrud.setBaseUrl();
 
 //string ends with
-spcrud.endsWith = function (str, suffix) {
+spcrud.endsWith = function(str, suffix) {
     return str.indexOf(suffix, str.length - suffix.length) !== -1;
 };
 
 //digest refresh worker
-spcrud.refreshDigest = function ($http) {
+spcrud.refreshDigest = function($http) {
     var config = {
         method: 'POST',
         url: spcrud.baseUrl + '/_api/contextinfo',
         headers: spcrud.headers
     };
-    return $http(config).then(function (response) {
+    return $http(config).then(function(response) {
         //parse JSON and save
         spcrud.headers['X-RequestDigest'] = response.data.d.GetContextWebInformation.FormDigestValue;
     });
@@ -85,7 +85,7 @@ spcrud.refreshDigest = function ($http) {
 };
 
 //lookup SharePoint current web user
-spcrud.getCurrentUser = function ($http) {
+spcrud.getCurrentUser = function($http) {
     if (!spcrud.currentUser) {
         var url = spcrud.baseUrl + '/_api/web/currentuser?$expand=Groups',
             config = {
@@ -97,7 +97,7 @@ spcrud.getCurrentUser = function ($http) {
         return $http(config);
     } else {
         return {
-            then: function (a) {
+            then: function(a) {
                 a();
             }
         };
@@ -105,7 +105,7 @@ spcrud.getCurrentUser = function ($http) {
 };
 
 //lookup my SharePoint profile
-spcrud.getMyProfile = function ($http) {
+spcrud.getMyProfile = function($http) {
     if (!spcrud.myProfile) {
         var url = spcrud.baseUrl + '/_api/SP.UserProfiles.PeopleManager/GetMyProperties?select=*',
             config = {
@@ -117,7 +117,7 @@ spcrud.getMyProfile = function ($http) {
         return $http(config);
     } else {
         return {
-            then: function (a) {
+            then: function(a) {
                 a();
             }
         };
@@ -125,7 +125,7 @@ spcrud.getMyProfile = function ($http) {
 };
 
 //lookup any SharePoint profile
-spcrud.getProfile = function ($http, login) {
+spcrud.getProfile = function($http, login) {
     var url = spcrud.baseUrl + '/_api/SP.UserProfiles.PeopleManager/GetPropertiesFor(accountName=@v)?@v=\'' + login + '\'&select=*',
         config = {
             method: 'GET',
@@ -136,7 +136,7 @@ spcrud.getProfile = function ($http, login) {
 };
 
 //ensure SPUser exists in target web
-spcrud.ensureUser = function ($http, login) {
+spcrud.ensureUser = function($http, login) {
     var url = spcrud.baseUrl + '/_api/web/ensureuser',
         config = {
             method: 'POST',
@@ -148,7 +148,7 @@ spcrud.ensureUser = function ($http, login) {
 };
 
 //create folder
-spcrud.createFolder = function ($http, folderUrl) {
+spcrud.createFolder = function($http, folderUrl) {
     var data = {
             '__metadata': {
                 'type': 'SP.Folder'
@@ -166,7 +166,7 @@ spcrud.createFolder = function ($http, folderUrl) {
 };
 
 //upload file to folder
-spcrud.uploadFile = function ($http, folderUrl, fileUrl, binary) {
+spcrud.uploadFile = function($http, folderUrl, fileUrl, binary) {
     var url = spcrud.baseUrl + '/_api/web/GetFolderByServerRelativeUrl(\'' + folderUrl + '\')/files/add(overwrite=true, url=\'' + fileUrl + '\')',
         config = {
             method: 'POST',
@@ -178,7 +178,7 @@ spcrud.uploadFile = function ($http, folderUrl, fileUrl, binary) {
 };
 
 //upload attachment to item
-spcrud.uploadAttach = function ($http, listName, id, fileName, binary, overwrite) {
+spcrud.uploadAttach = function($http, listName, id, fileName, binary, overwrite) {
     var url = spcrud.baseUrl + '/_api/web/lists/GetByTitle(\'' + listName + '\')/items(' + id,
         headers = JSON.parse(JSON.stringify(spcrud.headers));
 
@@ -201,7 +201,7 @@ spcrud.uploadAttach = function ($http, listName, id, fileName, binary, overwrite
 };
 
 //get attachment for item
-spcrud.getAttach = function ($http, listName, id) {
+spcrud.getAttach = function($http, listName, id) {
     var url = spcrud.baseUrl + '/_api/web/lists/GetByTitle(\'' + listName + '\')/items(' + id + ')/AttachmentFiles',
         config = {
             method: 'GET',
@@ -212,7 +212,7 @@ spcrud.getAttach = function ($http, listName, id) {
 };
 
 //send email
-spcrud.sendMail = function ($http, to, ffrom, subj, body) {
+spcrud.sendMail = function($http, to, ffrom, subj, body) {
     //append metadata
     to = to.split(",");
     var recip = (to instanceof Array) ? to : [to],
@@ -241,7 +241,7 @@ spcrud.sendMail = function ($http, to, ffrom, subj, body) {
 //----------SHAREPOINT LIST CORE----------
 
 //CREATE item - SharePoint list name, and JS object to stringify for save
-spcrud.create = function ($http, listName, jsonBody) {
+spcrud.create = function($http, listName, jsonBody) {
     //append metadata
     if (!jsonBody['__metadata']) {
         jsonBody['__metadata'] = {
@@ -259,7 +259,7 @@ spcrud.create = function ($http, listName, jsonBody) {
 };
 
 //READ entire list - needs $http factory and SharePoint list name
-spcrud.read = function ($http, listName, options) {
+spcrud.read = function($http, listName, options) {
     //build URL syntax
     //https://msdn.microsoft.com/en-us/library/office/fp142385.aspx#bk_support
     var url = spcrud.apiUrl.replace('{0}', listName);
@@ -281,9 +281,6 @@ spcrud.read = function ($http, listName, options) {
     if (options.skip) {
         url += ((spcrud.endsWith(url, 'items')) ? "?" : "&") + "$skip=" + options.skip;
     }
-    if (options.expand) {
-        url += ((spcrud.endsWith(url, 'items')) ? "?" : "&") + "$expand=" + options.expand;
-    }
 
     //config
     var config = {
@@ -295,7 +292,7 @@ spcrud.read = function ($http, listName, options) {
 };
 
 //READ single item - SharePoint list name, and item ID number
-spcrud.readItem = function ($http, listName, id) {
+spcrud.readItem = function($http, listName, id) {
     var config = {
         method: 'GET',
         url: spcrud.apiUrl.replace('{0}', listName) + '(' + id + ')',
@@ -305,7 +302,7 @@ spcrud.readItem = function ($http, listName, id) {
 };
 
 //UPDATE item - SharePoint list name, item ID number, and JS object to stringify for save
-spcrud.update = function ($http, listName, id, jsonBody) {
+spcrud.update = function($http, listName, id, jsonBody) {
     //append HTTP header MERGE for UPDATE scenario
     var headers = JSON.parse(JSON.stringify(spcrud.headers));
     headers['X-HTTP-Method'] = 'MERGE';
@@ -328,7 +325,7 @@ spcrud.update = function ($http, listName, id, jsonBody) {
 };
 
 //DELETE item - SharePoint list name and item ID number
-spcrud.del = function ($http, listName, id) {
+spcrud.del = function($http, listName, id) {
     //append HTTP header DELETE for DELETE scenario
     var headers = JSON.parse(JSON.stringify(spcrud.headers));
     headers['X-HTTP-Method'] = 'DELETE';
@@ -342,8 +339,8 @@ spcrud.del = function ($http, listName, id) {
 };
 
 //JSON blob read from SharePoint list - SharePoint list name
-spcrud.jsonRead = function ($http, listName, cache) {
-    return spcrud.getCurrentUser($http).then(function (response) {
+spcrud.jsonRead = function($http, listName, cache) {
+    return spcrud.getCurrentUser($http).then(function(response) {
         //GET SharePoint Current User
         spcrud.currentUser = response.data.d;
         spcrud.login = response.data.d.LoginName.toLowerCase();
@@ -366,12 +363,12 @@ spcrud.jsonRead = function ($http, listName, cache) {
         };
 
         //GET SharePoint Profile
-        spcrud.getMyProfile($http).then(function (response) {
+        spcrud.getMyProfile($http).then(function(response) {
             spcrud.myProfile = response.data.d;
         });
 
         //parse single SPListItem only
-        return $http(config).then(function (response) {
+        return $http(config).then(function(response) {
             if (response.data.d.results) {
                 return response.data.d.results[0];
             } else {
@@ -382,9 +379,9 @@ spcrud.jsonRead = function ($http, listName, cache) {
 };
 
 //JSON blob upsert write to SharePoint list - SharePoint list name and JS object to stringify for save
-spcrud.jsonWrite = function ($http, listName, jsonBody) {
-    return spcrud.refreshDigest($http).then(function (response) {
-        return spcrud.jsonRead($http, listName).then(function (item) {
+spcrud.jsonWrite = function($http, listName, jsonBody) {
+    return spcrud.refreshDigest($http).then(function(response) {
+        return spcrud.jsonRead($http, listName).then(function(item) {
             //HTTP 200 OK
             if (item) {
                 //update if found
