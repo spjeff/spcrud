@@ -19,8 +19,8 @@
  * spjeff@spjeff.com
  * http://spjeff.com
  *
- * version 0.1.13
- * last updated 08-01-2016
+ * version 0.1.14
+ * last updated 08-04-2016
  *
  */
 
@@ -28,7 +28,7 @@
 'use strict';
 var spcrud = spcrud || {};
 
-//----------SHARED----------
+//----------SHAREPOINT GENERAL----------
 
 //initialize
 spcrud.init = function() {
@@ -83,6 +83,35 @@ spcrud.refreshDigest = function($http) {
     });
 
 };
+
+//send email
+spcrud.sendMail = function($http, to, ffrom, subj, body) {
+    //append metadata
+    to = to.split(",");
+    var recip = (to instanceof Array) ? to : [to],
+        message = {
+            'properties': {
+                '__metadata': {
+                    'type': 'SP.Utilities.EmailProperties'
+                },
+                'To': {
+                    'results': recip
+                },
+                'From': ffrom,
+                'Subject': subj,
+                'Body': body
+            }
+        },
+        config = {
+            method: 'POST',
+            url: spcrud.baseUrl + '/_api/SP.Utilities.Utility.SendEmail',
+            headers: spcrud.headers,
+            data: angular.toJson(message)
+        };
+    return $http(config);
+};
+
+//----------SHAREPOINT USER PROFILES----------
 
 //lookup SharePoint current web user
 spcrud.getCurrentUser = function($http) {
@@ -147,6 +176,8 @@ spcrud.ensureUser = function($http, login) {
     return $http(config);
 };
 
+//----------SHAREPOINT FILES AND FOLDERS----------
+
 //create folder
 spcrud.createFolder = function($http, folderUrl) {
     var data = {
@@ -207,33 +238,6 @@ spcrud.getAttach = function($http, listName, id) {
             method: 'GET',
             url: url,
             headers: spcrud.headers
-        };
-    return $http(config);
-};
-
-//send email
-spcrud.sendMail = function($http, to, ffrom, subj, body) {
-    //append metadata
-    to = to.split(",");
-    var recip = (to instanceof Array) ? to : [to],
-        message = {
-            'properties': {
-                '__metadata': {
-                    'type': 'SP.Utilities.EmailProperties'
-                },
-                'To': {
-                    'results': recip
-                },
-                'From': ffrom,
-                'Subject': subj,
-                'Body': body
-            }
-        },
-        config = {
-            method: 'POST',
-            url: spcrud.baseUrl + '/_api/SP.Utilities.Utility.SendEmail',
-            headers: spcrud.headers,
-            data: angular.toJson(message)
         };
     return $http(config);
 };
