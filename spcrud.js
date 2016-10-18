@@ -200,6 +200,7 @@ spcrud.createFolder = function($http, folderUrl) {
 // upload file to folder
 // https://kushanlahiru.wordpress.com/2016/05/14/file-attach-to-sharepoint-2013-list-custom-using-angular-js-via-rest-api/
 // http://stackoverflow.com/questions/17063000/ng-model-for-input-type-file
+// var binary = new Uint8Array(FileReader.readAsArrayBuffer(file[0]));
 spcrud.uploadFile = function($http, folderUrl, fileName, binary) {
     var url = spcrud.baseUrl + '/_api/web/GetFolderByServerRelativeUrl(\'' + folderUrl + '\')/files/add(overwrite=true, url=\'' + fileName + '\')',
         config = {
