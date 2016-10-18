@@ -19,8 +19,8 @@
  * spjeff@spjeff.com
  * http://spjeff.com
  *
- * version 0.1.14
- * last updated 08-04-2016
+ * version 0.1.15
+ * last updated 10-18-2016
  *
  */
 
@@ -198,13 +198,14 @@ spcrud.createFolder = function($http, folderUrl) {
 };
 
 //upload file to folder
-spcrud.uploadFile = function($http, folderUrl, fileUrl, binary) {
-    var url = spcrud.baseUrl + '/_api/web/GetFolderByServerRelativeUrl(\'' + folderUrl + '\')/files/add(overwrite=true, url=\'' + fileUrl + '\')',
+spcrud.uploadFile = function($http, folderUrl, fileName, binary) {
+    var url = spcrud.baseUrl + '/_api/web/GetFolderByServerRelativeUrl(\'' + folderUrl + '\')/files/add(overwrite=true, url=\'' + fileName + '\')',
         config = {
             method: 'POST',
             url: url,
             headers: spcrud.headers,
-            data: binary
+            data: binary,
+            transformRequest: []
         };
     return $http(config);
 };
