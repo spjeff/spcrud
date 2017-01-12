@@ -19,8 +19,8 @@
  * spjeff@spjeff.com
  * http://spjeff.com
  *
- * version 0.1.15
- * last updated 10-18-2016
+ * version 0.1.17
+ * last updated 01-12-2017
  *
  */
 
@@ -173,6 +173,43 @@ spcrud.ensureUser = function ($http, login) {
             url: url,
             headers: spcrud.headers,
             data: login
+        };
+    return $http(config);
+};
+
+
+//----------SHAREPOINT LIST AND FIELDS----------
+//create list
+spcrud.createList = function ($http, title, baseTemplate, description) {
+    var data = {
+        '__metadata': { 'type': 'SP.List' },
+        'BaseTemplate': baseTemplate,
+        'Description': description,
+        'Title': title
+    },
+        url = spcrud.baseUrl + '/_api/web/lists',
+        config = {
+            method: 'POST',
+            url: url,
+            headers: spcrud.headers,
+            data: data
+        };
+    return $http(config);
+};
+
+//create list
+spcrud.createField = function ($http, listTitle, fieldName, fieldType) {
+    var data = {
+        '__metadata': { 'type': 'SP.Field' },
+        'Type': fieldType,
+        'Title': fieldName
+    },
+        url = spcrud.baseUrl + '/_api/web/lists/GetByTitle(\'' + listTitle + '\')/fields',
+        config = {
+            method: 'POST',
+            url: url,
+            headers: spcrud.headers,
+            data: data
         };
     return $http(config);
 };
