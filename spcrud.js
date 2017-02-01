@@ -167,7 +167,7 @@ spcrud.getProfile = function ($http, login) {
 
 //lookup any SharePoint UserInfo
 spcrud.getUserInfo = function ($http, Id) {
-    var url = spcrud.baseUrl + '/_api/GetUserById(\'' + Id + ')\'',
+    var url = spcrud.baseUrl + '/_api/web/getUserById(' + Id + ')',
         config = {
             method: 'GET',
             url: url,
