@@ -19,8 +19,8 @@
  * spjeff@spjeff.com
  * http://spjeff.com
  *
- * version 0.1.17
- * last updated 01-12-2017
+ * version 0.1.18
+ * last updated 02-01-2017
  *
  */
 
@@ -157,6 +157,17 @@ spcrud.getMyProfile = function ($http) {
 //lookup any SharePoint profile
 spcrud.getProfile = function ($http, login) {
     var url = spcrud.baseUrl + '/_api/SP.UserProfiles.PeopleManager/GetPropertiesFor(accountName=@v)?@v=\'' + login + '\'&select=*',
+        config = {
+            method: 'GET',
+            url: url,
+            headers: spcrud.headers
+        };
+    return $http(config);
+};
+
+//lookup any SharePoint UserInfo
+spcrud.getUserInfo = function ($http, Id) {
+    var url = spcrud.baseUrl + '/_api/GetUserById(\'' + Id + ')\'',
         config = {
             method: 'GET',
             url: url,
