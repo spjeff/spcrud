@@ -19,8 +19,8 @@
  * spjeff@spjeff.com
  * http://spjeff.com
  *
- * version 0.1.19
- * last updated 02-01-2017
+ * version 0.1.20
+ * last updated 05-26-2017
  *
  */
 
@@ -327,7 +327,7 @@ spcrud.create = function ($http, listName, jsonBody) {
 };
 
 spcrud.readBuilder = function (url, options) {
-	 if (options) {
+    if (options) {
         if (options.filter) {
             url += ((spcrud.endsWith(url, 'items')) ? "?" : "&") + "$filter=" + options.filter;
         }
@@ -347,15 +347,15 @@ spcrud.readBuilder = function (url, options) {
             url += ((spcrud.endsWith(url, 'items')) ? "?" : "&") + "$skip=" + options.skip;
         }
     }
-	return url;
-}
+    return url;
+};
 
 //READ entire list - needs $http factory and SharePoint list name
 spcrud.read = function ($http, listName, options) {
     //build URL syntax
     //https://msdn.microsoft.com/en-us/library/office/fp142385.aspx#bk_support
     var url = spcrud.apiUrl.replace('{0}', listName);
-	url = spcrud.readBuilder(url, options);
+    url = spcrud.readBuilder(url, options);
 
     //config
     var config = {
@@ -368,10 +368,10 @@ spcrud.read = function ($http, listName, options) {
 
 //READ single item - SharePoint list name, and item ID number
 spcrud.readItem = function ($http, listName, id) {
-	var url = spcrud.apiUrl.replace('{0}', listName) + '(' + id + ')'
-	url = spcrud.readBuilder(url, options);
-	
-	//config
+    var url = spcrud.apiUrl.replace('{0}', listName) + '(' + id + ')';
+    url = spcrud.readBuilder(url);
+
+    //config
     var config = {
         method: 'GET',
         url: url,
