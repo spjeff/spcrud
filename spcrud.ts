@@ -1,378 +1,162 @@
-imports(Http, Response, Headers) from '@angular/http';
+/**
+ * Library with AngularJS operations for CRUD operations to SharePoint 2013/2016/Online lists over REST api
+ *
+ * Contains 6 core functions and other misc helper functions
+ *
+ * 1) Create    - add item to List
+ * 2) Read      - find all items or single item from List
+ * 3) Update    - update item in List
+ * 4) Delete    - delete item in List
+ * 5) jsonRead  - read JSON to List
+ * 6) jsonWrite - write JSON to List ("upsert" = add if missing, update if exists)
+ *
+ * NOTE - 5 and 6 require the target SharePoint List to have two columns: "Title" (indexed) and "JSON" (mult-text).   These are
+ * intendend to save JSON objects for JS internal application needs.   For example, saving user preferences to a "JSON-Settings" list
+ * where one row is created per user (Title = current user Login) and JSON multi-text field holds the JSON blob.
+ * Simple and flexible way to save data for many scenarios.
+ *
+ * @spjeff
+ * spjeff@spjeff.com
+ * http://spjeff.com
+ *
+ * version 0.2.01
+ * last updated 06-02-2017
+ *
+ */
 
-// SPCrud - Angular 2 TypeScript Module
-export module SPCrud {
-    class SPCrud {
-        // private properties
-        baseUrl = '';
-        apiUrl = '';
-        headers;
+import { Injectable } from '@angular/core';
 
-        constructor(http: Http) {
-            setBaseUrl();
-        }
+// RxJS dependency
+import { Http, Headers, Response, RequestOptions } from '@angular/http';
+import { Observable } from 'rxjs/Observable';
+import 'rxjs/add/operator/catch';
+import 'rxjs/add/operator/map';
+import 'rxjs/add/operator/toPromise';
 
-        //----------SHAREPOINT GENERAL----------
+@Injectable()
+export class Spcrud {
 
-        //initialize
-        init() {
-            //default to local web URL
-            this.apiUrl = this.baseUrl + '/_api/web/lists/GetByTitle(\'{0}\')/items';
+  // Data
+  jsonHeader = 'application/json; odata=verbose';
+  headers = new Headers({ 'Content-Type': this.jsonHeader, 'Accept': this.jsonHeader });
+  options = new RequestOptions({ headers: this.headers });
+  baseUrl: String;
+  apiUrl: String;
 
-            //globals
-            const jsonHeader = 'application/json;odata=verbose';
-            this.headers = {
-                'Content-Type': jsonHeader,
-                'Accept': jsonHeader
-            };
+  constructor(private http: Http) {
+    this.setBaseUrl(null);
+  }
 
-            //request digest
-            var el = document.querySelector('#__REQUESTDIGEST');
-            if (el) {
-                //digest local to ASPX page
-                this.headers['X-RequestDigest'] = el.value;
-            }
-        };
-
-        //change target web URL
-        setBaseUrl(webUrl) {
-            if (webUrl) {
-                //user provided target Web URL
-                spcrud.baseUrl = webUrl;
-            } else {
-                //default local SharePoint context
-                if (window._spPageContextInfo) {
-                    this.baseUrl = window._spPageContextInfo.webAbsoluteUrl;
-                }
-            }
-            init();
-        };
-
-
-        //string ends with
-        endsWith(str, suffix) {
-            return str.indexOf(suffix, str.length - suffix.length) !== -1;
-        };
-
-        //digest refresh worker
-        refreshDigest() {
-            var config = {
-                url: this.baseUrl + '/_api/contextinfo',
-                headers: this.headers
-            };
-            return this.http.post(config).subscribe((res: Response) => res.json()).then(function (response) {
-                //parse JSON and save
-                this.headers['X-RequestDigest'] = response.data.d.GetContextWebInformation.FormDigestValue;
-            });
-
-        };
-
-        //send email
-        sendMail = function (to, ffrom, subj, body) {
-            //append metadata
-            to = to.split(",");
-            var recip = (to instanceof Array) ? to : [to],
-                message = {
-                    'properties': {
-                        '__metadata': {
-                            'type': 'SP.Utilities.EmailProperties'
-                        },
-                        'To': {
-                            'results': recip
-                        },
-                        'From': ffrom,
-                        'Subject': subj,
-                        'Body': body
-                    }
-                },
-                config = {
-                    url: spcrud.baseUrl + '/_api/SP.Utilities.Utility.SendEmail',
-                    headers: spcrud.headers,
-                    data: message.json()
-                };
-            return this.http.post(config).subscribe((res: Response) => res.json());
-        };
-
-        //----------SHAREPOINT USER PROFILES----------
-
-        //lookup SharePoint current web user
-        getCurrentUser() {
-            if (!spcrud.currentUser) {
-                var url = spcrud.baseUrl + '/_api/web/currentuser?$expand=Groups',
-                    config = {
-                        url: url,
-                        cache: true,
-                        headers: spcrud.headers
-                    };
-                return this.http.get(config).subscribe((res: Response) => res.json());
-            }
-        };
-
-        //lookup my SharePoint profile
-        getMyProfile() {
-            if (!spcrud.myProfile) {
-                var url = spcrud.baseUrl + '/_api/SP.UserProfiles.PeopleManager/GetMyProperties?select=*',
-                    config = {
-                        url: url,
-                        cache: true,
-                        headers: spcrud.headers
-                    };
-                return this.http.get(config).subscribe((res: Response) => res.json());
-            }
-        };
-
-        //lookup any SharePoint profile
-        getProfile(login) {
-            var url = spcrud.baseUrl + '/_api/SP.UserProfiles.PeopleManager/GetPropertiesFor(accountName=@v)?@v=\'' + login + '\'&select=*',
-                config = {
-                    url: url,
-                    headers: spcrud.headers
-                };
-            return this.http.get(config).subscribe((res: Response) => res.json());
-        };
-
-        //lookup any SharePoint UserInfo
-        getUserInfo(Id) {
-            var url = spcrud.baseUrl + '/_api/web/getUserById(' + Id + ')',
-                config = {
-                    url: url,
-                    headers: spcrud.headers
-                };
-            return this.http.get(config).subscribe((res: Response) => res.json());
-        };
-
-        //ensure SPUser exists in target web
-        ensureUser(login) {
-            var url = spcrud.baseUrl + '/_api/web/ensureuser',
-                config = {
-                    url: url,
-                    headers: spcrud.headers,
-                    data: login
-                };
-            return this.http.post(config).subscribe((res: Response) => res.json());
-        };
-
-
-        //----------SHAREPOINT LIST AND FIELDS----------
-        //create list
-        createList(title, baseTemplate, description) {
-            var data = {
-                '__metadata': { 'type': 'SP.List' },
-                'BaseTemplate': baseTemplate,
-                'Description': description,
-                'Title': title
-            },
-                url = spcrud.baseUrl + '/_api/web/lists',
-                config = {
-                    url: url,
-                    headers: spcrud.headers,
-                    data: data
-                };
-            return this.http.post(config).subscribe((res: Response) => res.json());
-        };
-
-        //create list
-        createField(listTitle, fieldName, fieldType) {
-            var data = {
-                '__metadata': { 'type': 'SP.Field' },
-                'Type': fieldType,
-                'Title': fieldName
-            },
-                url = spcrud.baseUrl + '/_api/web/lists/GetByTitle(\'' + listTitle + '\')/fields',
-                config = {
-                    url: url,
-                    headers: spcrud.headers,
-                    data: data
-                };
-            return this.http.post(config).subscribe((res: Response) => res.json());
-        };
-
-        //----------SHAREPOINT FILES AND FOLDERS----------
-
-        //create folder
-        createFolder(folderUrl) {
-            var data = {
-                '__metadata': {
-                    'type': 'SP.Folder'
-                },
-                'ServerRelativeUrl': folderUrl
-            },
-                url = spcrud.baseUrl + '/_api/web/folders',
-                config = {
-                    url: url,
-                    headers: spcrud.headers,
-                    data: data
-                };
-            return this.http.post(config).subscribe((res: Response) => res.json());
-        };
-
-        // upload file to folder
-        // https://kushanlahiru.wordpress.com/2016/05/14/file-attach-to-sharepoint-2013-list-custom-using-angular-js-via-rest-api/
-        // http://stackoverflow.com/questions/17063000/ng-model-for-input-type-file
-        // var binary = new Uint8Array(FileReader.readAsArrayBuffer(file[0]));
-        uploadFile(folderUrl, fileName, binary) {
-            var url = spcrud.baseUrl + '/_api/web/GetFolderByServerRelativeUrl(\'' + folderUrl + '\')/files/add(overwrite=true, url=\'' + fileName + '\')',
-                config = {
-                    url: url,
-                    headers: spcrud.headers,
-                    data: binary,
-                    transformRequest: []
-                };
-            return this.http.post(config).subscribe((res: Response) => res.json());
-        };
-
-        //upload attachment to item
-        uploadAttach(listName, id, fileName, binary, overwrite) {
-            var url = spcrud.baseUrl + '/_api/web/lists/GetByTitle(\'' + listName + '\')/items(' + id,
-                headers = JSON.parse(JSON.stringify(spcrud.headers));
-
-            if (overwrite) {
-                //append HTTP header PUT for UPDATE scenario
-                headers['X-HTTP-Method'] = 'PUT';
-                url += ')/AttachmentFiles(\'' + fileName + '\')/$value';
-            } else {
-                //CREATE scenario
-                url += ')/AttachmentFiles/add(FileName=\'' + fileName + '\')';
-            }
-
-            var config = {
-                url: url,
-                headers: headers,
-                data: binary
-            };
-            return this.http.post(config).subscribe((res: Response) => res.json());
-        };
-
-        //get attachment for item
-        getAttach(listName, id) {
-            var url = spcrud.baseUrl + '/_api/web/lists/GetByTitle(\'' + listName + '\')/items(' + id + ')/AttachmentFiles',
-                config = {
-                    method: 'GET',
-                    url: url,
-                    headers: spcrud.headers
-                };
-            return this.http.get(config).subscribe((res: Response) => res.json());
-        };
-
-        //copy file
-        copyFile(sourceUrl, destinationUrl) {
-            var url = spcrud.baseUrl + '/_api/web/getfilebyserverrelativeurl(\'' + sourceUrl + '\')/copyto(strnewurl=\'' + destinationUrl + '\',boverwrite=false)',
-                config = {
-                    method: 'POST',
-                    url: url,
-                    headers: spcrud.headers
-                };
-            return this.http.post(config).subscribe((res: Response) => res.json());
-        };
-
-        //----------SHAREPOINT LIST CORE----------
-
-        //CREATE item - SharePoint list name, and JS object to stringify for save
-        create(listName, jsonBody) {
-            //append metadata
-            if (!jsonBody.__metadata) {
-                jsonBody.__metadata = {
-                    'type': 'SP.ListItem'
-                };
-            }
-            var data = jsonBody.json(),
-                config = {
-                    url: spcrud.apiUrl.replace('{0}', listName),
-                    data: data,
-                    headers: spcrud.headers
-                };
-            return this.http.post(config).subscribe((res: Response) => res.json());
-        };
-
-        readBuilder(url, options) {
-            if (options) {
-                if (options.filter) {
-                    url += ((spcrud.endsWith(url, 'items')) ? "?" : "&") + "$filter=" + options.filter;
-                }
-                if (options.select) {
-                    url += ((spcrud.endsWith(url, 'items')) ? "?" : "&") + "$select=" + options.select;
-                }
-                if (options.orderby) {
-                    url += ((spcrud.endsWith(url, 'items')) ? "?" : "&") + "$orderby=" + options.orderby;
-                }
-                if (options.expand) {
-                    url += ((spcrud.endsWith(url, 'items')) ? "?" : "&") + "$expand=" + options.expand;
-                }
-                if (options.top) {
-                    url += ((spcrud.endsWith(url, 'items')) ? "?" : "&") + "$top=" + options.top;
-                }
-                if (options.skip) {
-                    url += ((spcrud.endsWith(url, 'items')) ? "?" : "&") + "$skip=" + options.skip;
-                }
-            }
-            return url;
-        }
-
-        //READ entire list - needs $http factory and SharePoint list name
-        read(listName, options) {
-            //build URL syntax
-            //https://msdn.microsoft.com/en-us/library/office/fp142385.aspx#bk_support
-            var url = this.apiUrl.replace('{0}', listName);
-            url = this.readBuilder(url, options);
-
-            //config
-            var config = {
-                url: url,
-                headers: spcrud.headers
-            };
-            return this.http.get(config).subscribe((res: Response) => res.json());
-        };
-
-        //READ single item - SharePoint list name, and item ID number
-        readItem = function (listName, id) {
-            var url = spcrud.apiUrl.replace('{0}', listName) + '(' + id + ')'
-            url = spcrud.readBuilder(url, options);
-
-            //config
-            var config = {
-                url: url,
-                headers: spcrud.headers
-            };
-            return this.http.get(config).subscribe((res: Response) => res.json());
-        };
-
-        //UPDATE item - SharePoint list name, item ID number, and JS object to stringify for save
-        update (listName, id, jsonBody) {
-            //append HTTP header MERGE for UPDATE scenario
-            var headers = JSON.parse(JSON.stringify(spcrud.headers));
-            headers['X-HTTP-Method'] = 'MERGE';
-            headers['If-Match'] = '*';
-
-            //append metadata
-            if (!jsonBody.__metadata) {
-                jsonBody.__metadata = {
-                    'type': 'SP.ListItem'
-                };
-            }
-            var data = jsonBody.json(),
-                config = {
-                    url: spcrud.apiUrl.replace('{0}', listName) + '(' + id + ')',
-                    data: data,
-                    headers: headers
-                };
-            return this.http.post(config).subscribe((res: Response) => res.json());
-        };
-
-        //DELETE item - SharePoint list name and item ID number
-        del = function (listName, id) {
-            //append HTTP header DELETE for DELETE scenario
-            var headers = JSON.parse(JSON.stringify(spcrud.headers));
-            headers['X-HTTP-Method'] = 'DELETE';
-            headers['If-Match'] = '*';
-            var config = {
-                url: spcrud.apiUrl.replace('{0}', listName) + '(' + id + ')',
-                headers: headers
-            };
-            return this.http.post(config).subscribe((res: Response) => res.json());
-        };
-
-
-        //... JSON ... Social
-
+  // HTTP Error handling
+  private handleError(error: Response | any) {
+    // generic from https://angular.io/docs/ts/latest/guide/server-communication.html
+    let errMsg: string;
+    if (error instanceof Response) {
+      const body = error.json() || '';
+      const err = body.error || JSON.stringify(body);
+      errMsg = `${error.status || ''} - ${error.statusText || ''} ${err}`;
+    } else {
+      errMsg = error.message ? error.message : error.toString();
     }
+    console.error(errMsg);
+    return Observable.throw(errMsg);
+  }
+
+  // String ends with
+  private endsWith(str, suffix) {
+    return str.indexOf(suffix, str.length - suffix.length) !== -1;
+  }
+
+  // ----------SHAREPOINT GENERAL----------
+
+  // Set base working URL path
+  setBaseUrl(webUrl: String) {
+    if (webUrl) {
+      // user provided target Web URL
+      this.baseUrl = webUrl;
+    } else {
+      // default local SharePoint context
+      const ctx = window['_spPageContextInfo'];
+      if (ctx) {
+        this.baseUrl = ctx.webAbsoluteUrl;
+      }
+    }
+
+    // Default to local web URL
+    this.apiUrl = this.baseUrl + '/_api/web/lists/GetByTitle(\'{0}\')/items';
+
+    // Request digest
+    const el = document.querySelector('#__REQUESTDIGEST');
+    if (el) {
+      // Digest local to ASPX page
+      // this.headers.delete('X-RequestDigest');
+      this.headers.append('X-RequestDigest', el.nodeValue);
+    }
+  }
+
+  // Data methods
+  getData(): Observable<any> {
+    return this.http.get('http://portal/sites/todo/_api/web/lists', this.options).map(function (res: Response) {
+      return res.json() || {};
+    }).catch(this.handleError);
+  }
+
+  // Refresh digest token
+  refreshDigest(): Promise<any> {
+    return this.http.post('/_api/contextinfo', this.options).toPromise().then(function (res: Response) {
+      // this.headers.delete('X-RequestDigest');
+      this.headers.append('X-RequestDigest', res.json().data.d.GetContextWebInformation.FormDigestValue);
+    });
+  }
+
+  // send email ... TBD ...
+
+
+
+  // ----------SHAREPOINT USER PROFILES----------
+
+  // Lookup SharePoint current web user
+  getCurrentUser(): Observable<any> {
+    const url = this.baseUrl + '/_api/web/currentuser?$expand=Groups';
+    return this.http.get(url, this.options).map(function (res: Response) {
+      return res.json() || {};
+    }).catch(this.handleError);
+  };
+
+
+  // JSON blob read from SharePoint list - SharePoint list name
+  jsonRead(listName: string): Promise<any> {
+
+    return this.getCurrentUser().toPromise().then(function (res: Response) {
+      // GET SharePoint Current User
+      const d = res.json().data.d;
+      this.currentUser = d;
+      this.login = d.LoginName.toLowerCase();
+      if (this.login.indexOf('\\')) {
+        // Parse domain prefix
+        this.login = this.login.split('\\')[1];
+      }
+
+      // GET SharePoint List Item
+      const url = this.apiUrl.replace('{0}', listName) + '?$select=JSON,Id,Title&$filter=Title+eq+\'' + this.login + '\'';
+      return this.http.get(url, this.options).map(function (res2: Response) {
+
+        // Parse JSON response
+        const d2 = res2.json().data.d;
+        if (d2.results) {
+          return d2.results[0];
+        } else {
+          return null;
+        }
+
+      }).catch(this.handleError);
+    });
+  };
+
+
+
+
+
+
+  // **
 }
