@@ -111,6 +111,33 @@ export class Spcrud {
 
   // send email ... TBD ...
 
+  // send email
+sendMail  (to: string, ffrom: string, subj: string, body: string) {
+    //append metadata
+    var tos: string[] = to.split(",");
+    var recip: string[] = (tos instanceof Array) ? tos : [tos],
+        message = {
+            'properties': {
+                '__metadata': {
+                    'type': 'SP.Utilities.EmailProperties'
+                },
+                'To': {
+                    'results': recip
+                },
+                'From': ffrom,
+                'Subject': subj,
+                'Body': body
+            }
+        },
+        config = {
+            method: 'POST',
+            url: spcrud.baseUrl + '/_api/SP.Utilities.Utility.SendEmail',
+            headers: spcrud.headers,
+            data: angular.toJson(message)
+        };
+    return $http(config);
+};
+
 
 
   // ----------SHAREPOINT USER PROFILES----------
@@ -154,9 +181,29 @@ export class Spcrud {
   };
 
 
-
-
-
+//JSON blob upsert write to SharePoint list - SharePoint list name and JS object to stringify for save
+jsonWrite  (listName: string, jsonBody: any) {
+    return this.refreshDigest().then(function (res: Response) {
+        return this.jsonRead(listName).then(function (item: any) {
+            //HTTP 200 OK
+            if (item) {
+                //update if found
+                item.JSON = JSON.stringify(jsonBody);
+                return this.update(listName, item.Id, item);
+            } else {
+                //create if missing
+                item = {
+                    '__metadata': {
+                        'type': 'SP.ListItem'
+                    },
+                    'Title': this.login,
+                    'JSON': JSON.stringify(jsonBody);
+                };
+                return this.create(listName, item);
+            }
+        });
+    });
+};
 
   // **
 }
