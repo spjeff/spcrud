@@ -1,0 +1,80 @@
+﻿<!--Live demo of SPCRUD library features-->
+
+<!--Third Party-->
+<script src="/sites/test/SiteAssets/angular.js"></script>
+
+<!--Application-->
+<script src="/sites/test/SiteAssets/spcrud.js"></script>
+<script src="/sites/test/SiteAssets/spcrud-demo.js"></script>
+
+<!--Main-->
+<div ng-app="spcrudApp">
+    <div ng-controller="spcrudCtl">
+
+        <!-- SharePoint List -->
+        <h2>SPCRUD demo - SharePoint List Create/Read/Update/Delete</h2>
+        <hr/>
+        <p>
+            List name:
+            <input type="text" ng-model="listName" />
+            <br/> Id:
+            <span ng-bind="itemId"></span>
+            <input type="button" ng-click="create()" value="Create" />
+            <input type="button" ng-click="read()" value="Read" />
+            <input type="button" ng-click="update()" ng-disabled="!itemId" value="Update" />
+            <input type="button" ng-click="del()" ng-disabled="!itemId" value="Delete" />
+            <br/>
+            <span ng-bind="status"></span>
+        </p>
+        <br/>
+      
+        <!-- JSON blob -->
+		<h2>JSON blob Read/Write</h2>
+	    <hr/>	
+	    <p>
+	        <input type="button" ng-click="settingsRead()" value="Read" />
+	        <input type="button" ng-click="settingsWrite()" value="Write" />
+	        <textarea rows="4" cols="100" ng-model="settings"></textarea>
+        </p>
+        <br/>
+
+        <!-- Send Mail -->
+		<h2>Send Mail</h2>
+	    <hr/>	
+	    <p>
+	    	To:<input type="text" ng-model="mailTo" />
+            From:<input type="text" ng-model="mailFrom" />
+            Subject:<input type="text" ng-model="mailSubj" />
+            Body:<input type="text" ng-model="mailBody" />
+            
+            <input type="button" ng-click="send()" value="Send Mail" />
+            
+	        <textarea rows="4" cols="100" ng-model="mailResult"></textarea>
+        </p>
+        <br/>
+        
+        <!-- Microsoft Access Web Database -->
+		<h2>MS Access ACCDW - SQL Azure CRUD</h2>
+	    <hr/>	
+	    <p>
+	    	Subweb URL:
+            <input type="text" ng-model="accSubweb" />
+            <br/>
+            Table name:
+            <input type="text" ng-model="accTable" />
+            <br/> Id:
+            <input type="text" ng-model="accId" size="3"/>
+            <input type="button" ng-click="accCreate()" value="Create" />
+            <input type="button" ng-click="accRead()" value="Read" />
+            <input type="button" ng-click="accReadID()" value="Read ID" />
+            <input type="button" ng-click="accUpdate()" ng-disabled="!accId" value="Update" />
+            <input type="button" ng-click="accDelete()" ng-disabled="!accId" value="Delete" />
+            
+	        <textarea rows="4" cols="100" ng-model="accResult"></textarea>
+            <br/>
+            <span ng-bind="accStatus"></span>
+        </p>
+        <br/>
+
+    </div>
+</div>
