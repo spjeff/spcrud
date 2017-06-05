@@ -19,8 +19,8 @@
  * spjeff@spjeff.com
  * http://spjeff.com
  *
- * version 0.1.20
- * last updated 05-26-2017
+ * version 0.1.21
+ * last updated 06-05-2017
  *
  */
 
@@ -81,7 +81,6 @@ spcrud.refreshDigest = function ($http) {
         //parse JSON and save
         spcrud.headers['X-RequestDigest'] = response.data.d.GetContextWebInformation.FormDigestValue;
     });
-
 };
 
 //send email
