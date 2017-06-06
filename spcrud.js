@@ -19,8 +19,8 @@
  * spjeff@spjeff.com
  * http://spjeff.com
  *
- * version 0.1.21
- * last updated 06-05-2017
+ * version 0.1.22
+ * last updated 06-06-2017
  *
  */
 
@@ -206,7 +206,7 @@ spcrud.createList = function ($http, title, baseTemplate, description) {
     return $http(config);
 };
 
-//create list
+//create field
 spcrud.createField = function ($http, listTitle, fieldName, fieldType) {
     var data = {
         '__metadata': { 'type': 'SP.Field' },
