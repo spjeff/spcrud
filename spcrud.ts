@@ -142,7 +142,6 @@ export class Spcrud {
     }).catch(this.handleError);
   };
 
-
   // Lookup my SharePoint profile
   getMyProfile(): Observable<any> {
     const url = this.baseUrl + '/_api/SP.UserProfiles.PeopleManager/GetMyProperties?select=*';
@@ -168,6 +167,7 @@ export class Spcrud {
   };
 
   // ----------SHAREPOINT LIST AND FIELDS----------
+
   // Create list
   createList(title: string, baseTemplate: string, description: string): Observable<any> {
     const data = {
@@ -191,7 +191,6 @@ export class Spcrud {
     return this.http.post(url, this.options, data);
   };
 
-
   // ----------SHAREPOINT FILES AND FOLDERS----------
 
   // Create folder
@@ -211,7 +210,8 @@ export class Spcrud {
   // http://stackoverflow.com/questions/17063000/ng-model-for-input-type-file
   // var binary = new Uint8Array(FileReader.readAsArrayBuffer(file[0]));
   uploadFile(folderUrl: string, fileName: string, binary: any): Observable<any> {
-    const url = this.baseUrl + '/_api/web/GetFolderByServerRelativeUrl(\'' + folderUrl + '\')/files/add(overwrite=true, url=\'' + fileName + '\')';
+    const url = this.baseUrl + '/_api/web/GetFolderByServerRelativeUrl(\''
+              + folderUrl + '\')/files/add(overwrite=true, url=\'' + fileName + '\')';
     return this.http.post(url, this.options, binary);
   };
 
@@ -238,7 +238,8 @@ export class Spcrud {
 
   // Copy file
   copyFile(sourceUrl: string, destinationUrl: string): Observable<any> {
-    const url = this.baseUrl + '/_api/web/GetFileByServerRelativeUrl(\'' + sourceUrl + '\')/copyto(strnewurl=\'' + destinationUrl + '\',boverwrite=false)';
+    const url = this.baseUrl + '/_api/web/GetFileByServerRelativeUrl(\''
+              + sourceUrl + '\')/copyto(strnewurl=\'' + destinationUrl + '\',boverwrite=false)';
     return this.http.post(url, this.options);
   };
 
@@ -291,7 +292,6 @@ export class Spcrud {
     return this.http.get(url, this.options);
   };
 
-
   // READ single item - SharePoint list name, and item ID number
   readItem(listName: string, id: string): Observable<any> {
     let url = this.apiUrl.replace('{0}', listName) + '(' + id + ')';
@@ -329,7 +329,6 @@ export class Spcrud {
 
   // JSON blob read from SharePoint list - SharePoint list name
   jsonRead(listName: string): Promise<any> {
-
     return this.getCurrentUser().toPromise().then(function (res: Response) {
       // GET SharePoint Current User
       const d = res.json().data.d;
@@ -355,7 +354,6 @@ export class Spcrud {
       }).catch(this.handleError);
     });
   };
-
 
   // JSON blob upsert write to SharePoint list - SharePoint list name and JS object to stringify for save
   jsonWrite(listName: string, jsonBody: any) {
