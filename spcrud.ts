@@ -94,13 +94,6 @@ export class Spcrud {
     }
   }
 
-  // Data methods
-  getData(): Observable<any> {
-    return this.http.get('http://portal/sites/todo/_api/web/lists', this.options).map(function (res: Response) {
-      return res.json() || {};
-    }).catch(this.handleError);
-  }
-
   // Refresh digest token
   refreshDigest(): Promise<any> {
     return this.http.post('/_api/contextinfo', this.options).toPromise().then(function (res: Response) {
@@ -284,7 +277,7 @@ export class Spcrud {
   };
 
   // READ entire list - needs $http factory and SharePoint list name
-  read(listName: string, options: any): Observable<any> {
+  read(listName: string, options?: any): Observable<any> {
     // Build URL syntax
     // https://msdn.microsoft.com/en-us/library/office/fp142385.aspx#bk_support
     let url = this.apiUrl.replace('{0}', listName);
