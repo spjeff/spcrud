@@ -19,7 +19,7 @@
  * spjeff@spjeff.com
  * http://spjeff.com
  *
- * version 0.2.04
+ * version 0.2.05
  * last updated 06-08-2017
  *
  */
@@ -188,7 +188,7 @@ export class Spcrud {
       'Title': fieldName
     };
     const url = this.baseUrl + '/_api/web/lists/GetByTitle(\'' + listTitle + '\')/fields';
-    return this.http.post(url, this.options, data);
+    return this.http.post(url, data, this.options);
   };
 
   // ----------SHAREPOINT FILES AND FOLDERS----------
@@ -202,7 +202,7 @@ export class Spcrud {
       'ServerRelativeUrl': folderUrl
     };
     const url = this.baseUrl + '/_api/web/folders';
-    return this.http.post(url, this.options, data);
+    return this.http.post(url, data, this.options);
   };
 
   // Upload file to folder
@@ -212,7 +212,7 @@ export class Spcrud {
   uploadFile(folderUrl: string, fileName: string, binary: any): Observable<any> {
     const url = this.baseUrl + '/_api/web/GetFolderByServerRelativeUrl(\''
               + folderUrl + '\')/files/add(overwrite=true, url=\'' + fileName + '\')';
-    return this.http.post(url, this.options, binary);
+    return this.http.post(url, binary, this.options);
   };
 
   // Upload attachment to item
@@ -227,7 +227,7 @@ export class Spcrud {
       // CREATE scenario
       url += ')/AttachmentFiles/add(FileName=\'' + fileName + '\')';
     }
-    return this.http.post(url, options, binary);
+    return this.http.post(url, binary, options);
   };
 
   // Get attachment for item
