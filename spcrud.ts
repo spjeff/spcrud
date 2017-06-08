@@ -19,7 +19,7 @@
  * spjeff@spjeff.com
  * http://spjeff.com
  *
- * version 0.2.06
+ * version 0.2.07
  * last updated 06-08-2017
  *
  */
@@ -128,41 +128,49 @@ export class Spcrud {
   // ----------SHAREPOINT USER PROFILES----------
 
   // Lookup SharePoint current web user
-  getCurrentUser(): Observable<any> {
+  getCurrentUser(): Promise<any> {
     const url = this.baseUrl + '/_api/web/currentuser?$expand=Groups';
-    return this.http.get(url, this.options).map(function (res: Response) {
-      return res.json() || {};
+    return this.http.get(url, this.options).toPromise().then(function (res: Response) {
+      return res.json();
     }).catch(this.handleError);
   };
 
   // Lookup my SharePoint profile
-  getMyProfile(): Observable<any> {
+  getMyProfile(): Promise<any> {
     const url = this.baseUrl + '/_api/SP.UserProfiles.PeopleManager/GetMyProperties?select=*';
-    return this.http.get(url, this.options);
+    return this.http.get(url, this.options).toPromise().then(function (res: Response) {
+      return res.json();
+    }).catch(this.handleError);
   };
 
   // Lookup any SharePoint profile
-  getProfile(login: string): Observable<any> {
+  getProfile(login: string): Promise<any> {
     const url = this.baseUrl + '/_api/SP.UserProfiles.PeopleManager/GetPropertiesFor(accountName=@v)?@v=\'' + login + '\'&select=*';
-    return this.http.get(url, this.options);
+    return this.http.get(url, this.options).toPromise().then(function (res: Response) {
+      return res.json();
+    }).catch(this.handleError);
   };
 
   // Lookup any SharePoint UserInfo
-  getUserInfo(id: string): Observable<any> {
+  getUserInfo(id: string): Promise<any> {
     const url = this.baseUrl + '/_api/web/getUserById(' + id + ')';
-    return this.http.get(url);
+    return this.http.get(url).toPromise().then(function (res: Response) {
+      return res.json();
+    }).catch(this.handleError);
   };
 
   // Ensure SPUser exists in target web
-  ensureUser(login: string): Observable<any> {
+  ensureUser(login: string): Promise<any> {
     const url = this.baseUrl + '/_api/web/ensureuser';
-    return this.http.post(url, login, this.options);
+    return this.http.post(url, login, this.options).toPromise().then(function (res: Response) {
+      return res.json();
+    }).catch(this.handleError);
   };
 
   // ----------SHAREPOINT LIST AND FIELDS----------
 
   // Create list
-  createList(title: string, baseTemplate: string, description: string): Observable<any> {
+  createList(title: string, baseTemplate: string, description: string): Promise<any> {
     const data = {
       '__metadata': { 'type': 'SP.List' },
       'BaseTemplate': baseTemplate,
@@ -170,24 +178,28 @@ export class Spcrud {
       'Title': title
     };
     const url = this.baseUrl + '/_api/web/lists';
-    return this.http.post(url, data, this.options);
+    return this.http.post(url, data, this.options).toPromise().then(function (res: Response) {
+      return res.json();
+    }).catch(this.handleError);
   };
 
   // Create field
-  createField(listTitle: string, fieldName: string, fieldType: string): Observable<any> {
+  createField(listTitle: string, fieldName: string, fieldType: string): Promise<any> {
     const data = {
       '__metadata': { 'type': 'SP.Field' },
       'Type': fieldType,
       'Title': fieldName
     };
     const url = this.baseUrl + '/_api/web/lists/GetByTitle(\'' + listTitle + '\')/fields';
-    return this.http.post(url, data, this.options);
+    return this.http.post(url, data, this.options).toPromise().then(function (res: Response) {
+      return res.json();
+    }).catch(this.handleError);
   };
 
   // ----------SHAREPOINT FILES AND FOLDERS----------
 
   // Create folder
-  createFolder(folderUrl: string): Observable<any> {
+  createFolder(folderUrl: string): Promise<any> {
     const data = {
       '__metadata': {
         'type': 'SP.Folder'
@@ -195,21 +207,25 @@ export class Spcrud {
       'ServerRelativeUrl': folderUrl
     };
     const url = this.baseUrl + '/_api/web/folders';
-    return this.http.post(url, data, this.options);
+    return this.http.post(url, data, this.options).toPromise().then(function (res: Response) {
+      return res.json();
+    }).catch(this.handleError);
   };
 
   // Upload file to folder
   // https://kushanlahiru.wordpress.com/2016/05/14/file-attach-to-sharepoint-2013-list-custom-using-angular-js-via-rest-api/
   // http://stackoverflow.com/questions/17063000/ng-model-for-input-type-file
   // var binary = new Uint8Array(FileReader.readAsArrayBuffer(file[0]));
-  uploadFile(folderUrl: string, fileName: string, binary: any): Observable<any> {
+  uploadFile(folderUrl: string, fileName: string, binary: any): Promise<any> {
     const url = this.baseUrl + '/_api/web/GetFolderByServerRelativeUrl(\''
-              + folderUrl + '\')/files/add(overwrite=true, url=\'' + fileName + '\')';
-    return this.http.post(url, binary, this.options);
+      + folderUrl + '\')/files/add(overwrite=true, url=\'' + fileName + '\')';
+    return this.http.post(url, binary, this.options).toPromise().then(function (res: Response) {
+      return res.json();
+    }).catch(this.handleError);
   };
 
   // Upload attachment to item
-  uploadAttach(listName: string, id: string, fileName: string, binary: any, overwrite?: boolean): Observable<any> {
+  uploadAttach(listName: string, id: string, fileName: string, binary: any, overwrite?: boolean): Promise<any> {
     let url = this.baseUrl + '/_api/web/lists/GetByTitle(\'' + listName + '\')/items(' + id;
     const options = this.options;
     if (overwrite) {
@@ -220,26 +236,32 @@ export class Spcrud {
       // CREATE scenario
       url += ')/AttachmentFiles/add(FileName=\'' + fileName + '\')';
     }
-    return this.http.post(url, binary, options);
+    return this.http.post(url, binary, options).toPromise().then(function (res: Response) {
+      return res.json();
+    }).catch(this.handleError);
   };
 
   // Get attachment for item
-  getAttach(listName: string, id: string): Observable<any> {
+  getAttach(listName: string, id: string): Promise<any> {
     const url = this.baseUrl + '/_api/web/lists/GetByTitle(\'' + listName + '\')/items(' + id + ')/AttachmentFiles';
-    return this.http.get(url, this.options);
+    return this.http.get(url, this.options).toPromise().then(function (res: Response) {
+      return res.json();
+    }).catch(this.handleError);
   };
 
   // Copy file
-  copyFile(sourceUrl: string, destinationUrl: string): Observable<any> {
+  copyFile(sourceUrl: string, destinationUrl: string): Promise<any> {
     const url = this.baseUrl + '/_api/web/GetFileByServerRelativeUrl(\''
-              + sourceUrl + '\')/copyto(strnewurl=\'' + destinationUrl + '\',boverwrite=false)';
-    return this.http.post(url, this.options);
+      + sourceUrl + '\')/copyto(strnewurl=\'' + destinationUrl + '\',boverwrite=false)';
+    return this.http.post(url, this.options).toPromise().then(function (res: Response) {
+      return res.json();
+    }).catch(this.handleError);
   };
 
   // ----------SHAREPOINT LIST CORE----------
 
   // CREATE item - SharePoint list name, and JS object to stringify for save
-  create(listName: string, jsonBody: any): Observable<any> {
+  create(listName: string, jsonBody: any): Promise<any> {
     const url = this.apiUrl.replace('{0}', listName);
     // append metadata
     if (!jsonBody.__metadata) {
@@ -248,7 +270,9 @@ export class Spcrud {
       };
     }
     const data = JSON.stringify(jsonBody);
-    return this.http.post(url, data, this.options);
+    return this.http.post(url, data, this.options).toPromise().then(function (res: Response) {
+      return res.json();
+    }).catch(this.handleError);
   };
 
   // Build URL string with OData parameters
@@ -277,23 +301,27 @@ export class Spcrud {
   };
 
   // READ entire list - needs $http factory and SharePoint list name
-  read(listName: string, options?: any): Observable<any> {
+  read(listName: string, options?: any): Promise<any> {
     // Build URL syntax
     // https://msdn.microsoft.com/en-us/library/office/fp142385.aspx#bk_support
     let url = this.apiUrl.replace('{0}', listName);
     url = this.readBuilder(url, options);
-    return this.http.get(url, this.options);
+    return this.http.get(url, this.options).toPromise().then(function (resp: Response) {
+      return resp.json();
+    });
   };
 
   // READ single item - SharePoint list name, and item ID number
-  readItem(listName: string, id: string): Observable<any> {
+  readItem(listName: string, id: string): Promise<any> {
     let url = this.apiUrl.replace('{0}', listName) + '(' + id + ')';
     url = this.readBuilder(url, null);
-    return this.http.get(url, this.options);
+    return this.http.get(url, this.options).toPromise().then(function (resp: Response) {
+      return resp.json();
+    });
   };
 
   // UPDATE item - SharePoint list name, item ID number, and JS object to stringify for save
-  update(listName: string, id: string, jsonBody: any) {
+  update(listName: string, id: string, jsonBody: any): Promise<any> {
     // Append HTTP header MERGE for UPDATE scenario
     const options = JSON.parse(JSON.stringify(this.options));
     options.headers.append('X-HTTP-Method', 'MERGE');
@@ -307,22 +335,26 @@ export class Spcrud {
     }
     const data = JSON.stringify(jsonBody);
     const url = this.apiUrl.replace('{0}', listName) + '(' + id + ')';
-    return this.http.post(url, data, options);
+    return this.http.post(url, data, options).toPromise().then(function (resp: Response) {
+      return resp.json();
+    });
   };
 
   // DELETE item - SharePoint list name and item ID number
-  del(listName: string, id: string) {
+  del(listName: string, id: string): Promise<any>  {
     // append HTTP header DELETE for DELETE scenario
     const options = JSON.parse(JSON.stringify(this.options));
     options.headers.append('X-HTTP-Method', 'DELETE');
     options.headers.append('If-Match', '*');
     const url = this.apiUrl.replace('{0}', listName) + '(' + id + ')';
-    return this.http.post(url, options);
+    return this.http.post(url, options).toPromise().then(function (resp: Response) {
+      return resp.json();
+    });
   };
 
   // JSON blob read from SharePoint list - SharePoint list name
   jsonRead(listName: string): Promise<any> {
-    return this.getCurrentUser().toPromise().then(function (res: Response) {
+    return this.getCurrentUser().then(function (res: Response) {
       // GET SharePoint Current User
       const d = res.json().data.d;
       this.currentUser = d;
@@ -334,7 +366,7 @@ export class Spcrud {
 
       // GET SharePoint List Item
       const url = this.apiUrl.replace('{0}', listName) + '?$select=JSON,Id,Title&$filter=Title+eq+\'' + this.login + '\'';
-      return this.http.get(url, this.options).map(function (res2: Response) {
+      return this.http.get(url, this.options).toPromise().then(function (res2: Response) {
 
         // Parse JSON response
         const d2 = res2.json().data.d;
