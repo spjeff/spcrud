@@ -19,7 +19,7 @@
  * spjeff@spjeff.com
  * http://spjeff.com
  *
- * version 0.2.05
+ * version 0.2.06
  * last updated 06-08-2017
  *
  */
@@ -63,14 +63,14 @@ export class Spcrud {
   }
 
   // String ends with
-  private endsWith(str, suffix) {
+  private endsWith(str: string, suffix: string) {
     return str.indexOf(suffix, str.length - suffix.length) !== -1;
   }
 
   // ----------SHAREPOINT GENERAL----------
 
   // Set base working URL path
-  setBaseUrl(webUrl: String) {
+  setBaseUrl(webUrl: string) {
     if (webUrl) {
       // user provided target Web URL
       this.baseUrl = webUrl;
@@ -148,8 +148,8 @@ export class Spcrud {
   };
 
   // Lookup any SharePoint UserInfo
-  getUserInfo(Id: string): Observable<any> {
-    const url = this.baseUrl + '/_api/web/getUserById(' + Id + ')';
+  getUserInfo(id: string): Observable<any> {
+    const url = this.baseUrl + '/_api/web/getUserById(' + id + ')';
     return this.http.get(url);
   };
 
@@ -209,7 +209,7 @@ export class Spcrud {
   };
 
   // Upload attachment to item
-  uploadAttach(listName: string, id: string, fileName: string, binary: any, overwrite: boolean): Observable<any> {
+  uploadAttach(listName: string, id: string, fileName: string, binary: any, overwrite?: boolean): Observable<any> {
     let url = this.baseUrl + '/_api/web/lists/GetByTitle(\'' + listName + '\')/items(' + id;
     const options = this.options;
     if (overwrite) {
