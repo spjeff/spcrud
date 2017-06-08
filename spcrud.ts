@@ -19,8 +19,8 @@
  * spjeff@spjeff.com
  * http://spjeff.com
  *
- * version 0.2.03
- * last updated 06-06-2017
+ * version 0.2.04
+ * last updated 06-08-2017
  *
  */
 
@@ -112,9 +112,9 @@ export class Spcrud {
   // Send email
   sendMail(to: string, ffrom: string, subj: string, body: string): Promise<any> {
     // Append metadata
-    var tos: string[] = to.split(",");
-    var recip: string[] = (tos instanceof Array) ? tos : [tos];
-    var message = {
+    const tos: string[] = to.split(',');
+    const recip: string[] = (tos instanceof Array) ? tos : [tos];
+    const message = {
       'properties': {
         '__metadata': {
           'type': 'SP.Utilities.EmailProperties'
@@ -129,7 +129,7 @@ export class Spcrud {
     };
     const url = this.baseUrl + '/_api/SP.Utilities.Utility.SendEmail';
     const data = JSON.stringify(message);
-    return this.http.post(url, this.options, data).toPromise();
+    return this.http.post(url, data, this.options).toPromise();
   };
 
   // ----------SHAREPOINT USER PROFILES----------
@@ -145,8 +145,8 @@ export class Spcrud {
 
   // Lookup my SharePoint profile
   getMyProfile(): Observable<any> {
-    let url = this.baseUrl + '/_api/SP.UserProfiles.PeopleManager/GetMyProperties?select=*';
-    return this.http.get(url, this.options)
+    const url = this.baseUrl + '/_api/SP.UserProfiles.PeopleManager/GetMyProperties?select=*';
+    return this.http.get(url, this.options);
   };
 
   // Lookup any SharePoint profile
@@ -164,30 +164,30 @@ export class Spcrud {
   // Ensure SPUser exists in target web
   ensureUser(login: string): Observable<any> {
     const url = this.baseUrl + '/_api/web/ensureuser';
-    return this.http.post(url, this.options, login);
+    return this.http.post(url, login, this.options);
   };
 
   // ----------SHAREPOINT LIST AND FIELDS----------
   // Create list
   createList(title: string, baseTemplate: string, description: string): Observable<any> {
-    let data = {
+    const data = {
       '__metadata': { 'type': 'SP.List' },
       'BaseTemplate': baseTemplate,
       'Description': description,
       'Title': title
     };
     const url = this.baseUrl + '/_api/web/lists';
-    return this.http.post(url, this.options, data)
+    return this.http.post(url, data, this.options);
   };
 
   // Create field
   createField(listTitle: string, fieldName: string, fieldType: string): Observable<any> {
-    let data = {
+    const data = {
       '__metadata': { 'type': 'SP.Field' },
       'Type': fieldType,
       'Title': fieldName
     };
-    let url = this.baseUrl + '/_api/web/lists/GetByTitle(\'' + listTitle + '\')/fields';
+    const url = this.baseUrl + '/_api/web/lists/GetByTitle(\'' + listTitle + '\')/fields';
     return this.http.post(url, this.options, data);
   };
 
@@ -196,13 +196,13 @@ export class Spcrud {
 
   // Create folder
   createFolder(folderUrl: string): Observable<any> {
-    let data = {
+    const data = {
       '__metadata': {
         'type': 'SP.Folder'
       },
       'ServerRelativeUrl': folderUrl
     };
-    let url = this.baseUrl + '/_api/web/folders';
+    const url = this.baseUrl + '/_api/web/folders';
     return this.http.post(url, this.options, data);
   };
 
@@ -211,14 +211,14 @@ export class Spcrud {
   // http://stackoverflow.com/questions/17063000/ng-model-for-input-type-file
   // var binary = new Uint8Array(FileReader.readAsArrayBuffer(file[0]));
   uploadFile(folderUrl: string, fileName: string, binary: any): Observable<any> {
-    let url = this.baseUrl + '/_api/web/GetFolderByServerRelativeUrl(\'' + folderUrl + '\')/files/add(overwrite=true, url=\'' + fileName + '\')';
+    const url = this.baseUrl + '/_api/web/GetFolderByServerRelativeUrl(\'' + folderUrl + '\')/files/add(overwrite=true, url=\'' + fileName + '\')';
     return this.http.post(url, this.options, binary);
   };
 
   // Upload attachment to item
   uploadAttach(listName: string, id: string, fileName: string, binary: any, overwrite: boolean): Observable<any> {
     let url = this.baseUrl + '/_api/web/lists/GetByTitle(\'' + listName + '\')/items(' + id;
-    let options = this.options;
+    const options = this.options;
     if (overwrite) {
       // Append HTTP header PUT for UPDATE scenario
       options.headers.append('X-HTTP-Method', 'PUT');
@@ -232,13 +232,13 @@ export class Spcrud {
 
   // Get attachment for item
   getAttach(listName: string, id: string): Observable<any> {
-    let url = this.baseUrl + '/_api/web/lists/GetByTitle(\'' + listName + '\')/items(' + id + ')/AttachmentFiles';
+    const url = this.baseUrl + '/_api/web/lists/GetByTitle(\'' + listName + '\')/items(' + id + ')/AttachmentFiles';
     return this.http.get(url, this.options);
   };
 
   // Copy file
   copyFile(sourceUrl: string, destinationUrl: string): Observable<any> {
-    let url = this.baseUrl + '/_api/web/getfilebyserverrelativeurl(\'' + sourceUrl + '\')/copyto(strnewurl=\'' + destinationUrl + '\',boverwrite=false)';
+    const url = this.baseUrl + '/_api/web/GetFileByServerRelativeUrl(\'' + sourceUrl + '\')/copyto(strnewurl=\'' + destinationUrl + '\',boverwrite=false)';
     return this.http.post(url, this.options);
   };
 
@@ -246,37 +246,37 @@ export class Spcrud {
 
   // CREATE item - SharePoint list name, and JS object to stringify for save
   create(listName: string, jsonBody: any): Observable<any> {
-    let url = this.apiUrl.replace('{0}', listName);
-    //append metadata
+    const url = this.apiUrl.replace('{0}', listName);
+    // append metadata
     if (!jsonBody.__metadata) {
       jsonBody.__metadata = {
         'type': 'SP.ListItem'
       };
     }
-    var data = JSON.stringify(jsonBody);
-    return this.http.post(url, this.options, data);
+    const data = JSON.stringify(jsonBody);
+    return this.http.post(url, data, this.options);
   };
 
   // Build URL string with OData parameters
   readBuilder(url: string, options: any): string {
     if (options) {
       if (options.filter) {
-        url += ((this.endsWith(url, 'items')) ? "?" : "&") + "$filter=" + options.filter;
+        url += ((this.endsWith(url, 'items')) ? '?' : '&') + '$filter=' + options.filter;
       }
       if (options.select) {
-        url += ((this.endsWith(url, 'items')) ? "?" : "&") + "$select=" + options.select;
+        url += ((this.endsWith(url, 'items')) ? '?' : '&') + '$select=' + options.select;
       }
       if (options.orderby) {
-        url += ((this.endsWith(url, 'items')) ? "?" : "&") + "$orderby=" + options.orderby;
+        url += ((this.endsWith(url, 'items')) ? '?' : '&') + '$orderby=' + options.orderby;
       }
       if (options.expand) {
-        url += ((this.endsWith(url, 'items')) ? "?" : "&") + "$expand=" + options.expand;
+        url += ((this.endsWith(url, 'items')) ? '?' : '&') + '$expand=' + options.expand;
       }
       if (options.top) {
-        url += ((this.endsWith(url, 'items')) ? "?" : "&") + "$top=" + options.top;
+        url += ((this.endsWith(url, 'items')) ? '?' : '&') + '$top=' + options.top;
       }
       if (options.skip) {
-        url += ((this.endsWith(url, 'items')) ? "?" : "&") + "$skip=" + options.skip;
+        url += ((this.endsWith(url, 'items')) ? '?' : '&') + '$skip=' + options.skip;
       }
     }
     return url;
@@ -302,7 +302,7 @@ export class Spcrud {
   // UPDATE item - SharePoint list name, item ID number, and JS object to stringify for save
   update(listName: string, id: string, jsonBody: any) {
     // Append HTTP header MERGE for UPDATE scenario
-    let options = JSON.parse(JSON.stringify(this.options));
+    const options = JSON.parse(JSON.stringify(this.options));
     options.headers.append('X-HTTP-Method', 'MERGE');
     options.headers.append('If-Match', '*');
 
@@ -312,18 +312,18 @@ export class Spcrud {
         'type': 'SP.ListItem'
       };
     }
-    let data = JSON.stringify(jsonBody);
-    let url = this.apiUrl.replace('{0}', listName) + '(' + id + ')';
-    return this.http.post(url, options, data);
+    const data = JSON.stringify(jsonBody);
+    const url = this.apiUrl.replace('{0}', listName) + '(' + id + ')';
+    return this.http.post(url, data, options);
   };
 
   // DELETE item - SharePoint list name and item ID number
   del(listName: string, id: string) {
-    //append HTTP header DELETE for DELETE scenario
-    let options = JSON.parse(JSON.stringify(this.options));
+    // append HTTP header DELETE for DELETE scenario
+    const options = JSON.parse(JSON.stringify(this.options));
     options.headers.append('X-HTTP-Method', 'DELETE');
     options.headers.append('If-Match', '*');
-    let url = this.apiUrl.replace('{0}', listName) + '(' + id + ')';
+    const url = this.apiUrl.replace('{0}', listName) + '(' + id + ')';
     return this.http.post(url, options);
   };
 
@@ -363,7 +363,7 @@ export class Spcrud {
       return this.jsonRead(listName).then(function (item: any) {
         // HTTP 200 OK
         if (item) {
-          //update if found
+          // update if found
           item.JSON = JSON.stringify(jsonBody);
           return this.update(listName, item.Id, item);
         } else {
