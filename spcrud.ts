@@ -70,7 +70,7 @@ export class Spcrud {
   // ----------SHAREPOINT GENERAL----------
 
   // Set base working URL path
-  setBaseUrl(webUrl: string) {
+  setBaseUrl(webUrl?: string) {
     if (webUrl) {
       // user provided target Web URL
       this.baseUrl = webUrl;
