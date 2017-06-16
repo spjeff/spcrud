@@ -19,8 +19,8 @@
  * spjeff@spjeff.com
  * http://spjeff.com
  *
- * version 0.2.07
- * last updated 06-08-2017
+ * version 0.2.08
+ * last updated 06-16-2017
  *
  */
 
@@ -42,6 +42,8 @@ export class Spcrud {
   options = new RequestOptions({ headers: this.headers });
   baseUrl: String;
   apiUrl: String;
+  currentUser: String;
+  login: String;
 
   constructor(private http: Http) {
     this.setBaseUrl(null);
@@ -96,9 +98,10 @@ export class Spcrud {
 
   // Refresh digest token
   refreshDigest(): Promise<any> {
-    return this.http.post('/_api/contextinfo', this.options).toPromise().then(function (res: Response) {
-      // this.headers.delete('X-RequestDigest');
-      this.headers.append('X-RequestDigest', res.json().data.d.GetContextWebInformation.FormDigestValue);
+    const svc = this;
+    return this.http.post(this.baseUrl + '/_api/contextinfo', null, this.options).toPromise().then(function (res: Response) {
+      svc.headers.delete('X-RequestDigest');
+      svc.headers.append('X-RequestDigest', res.json().d.GetContextWebInformation.FormDigestValue);
     });
   }
 
@@ -323,9 +326,9 @@ export class Spcrud {
   // UPDATE item - SharePoint list name, item ID number, and JS object to stringify for save
   update(listName: string, id: string, jsonBody: any): Promise<any> {
     // Append HTTP header MERGE for UPDATE scenario
-    const options = JSON.parse(JSON.stringify(this.options));
-    options.headers.append('X-HTTP-Method', 'MERGE');
-    options.headers.append('If-Match', '*');
+    const localOptions: RequestOptions = this.options;
+    localOptions.headers.append('X-HTTP-Method', 'MERGE');
+    localOptions.headers.append('If-Match', '*');
 
     // Append metadata
     if (!jsonBody.__metadata) {
@@ -335,70 +338,71 @@ export class Spcrud {
     }
     const data = JSON.stringify(jsonBody);
     const url = this.apiUrl.replace('{0}', listName) + '(' + id + ')';
-    return this.http.post(url, data, options).toPromise().then(function (resp: Response) {
+    return this.http.post(url, data, localOptions).toPromise().then(function (resp: Response) {
       return resp.json();
     });
   };
 
   // DELETE item - SharePoint list name and item ID number
-  del(listName: string, id: string): Promise<any>  {
+  del(listName: string, id: string): Promise<any> {
     // append HTTP header DELETE for DELETE scenario
-    const options = JSON.parse(JSON.stringify(this.options));
-    options.headers.append('X-HTTP-Method', 'DELETE');
-    options.headers.append('If-Match', '*');
+    const localOptions: RequestOptions = this.options;
+    localOptions.headers.append('X-HTTP-Method', 'DELETE');
+    localOptions.headers.append('If-Match', '*');
     const url = this.apiUrl.replace('{0}', listName) + '(' + id + ')';
-    return this.http.post(url, options).toPromise().then(function (resp: Response) {
+    return this.http.post(url, localOptions).toPromise().then(function (resp: Response) {
       return resp.json();
     });
   };
 
   // JSON blob read from SharePoint list - SharePoint list name
   jsonRead(listName: string): Promise<any> {
-    return this.getCurrentUser().then(function (res: Response) {
+    const svc = this;
+    return this.getCurrentUser().then(function (res: any) {
       // GET SharePoint Current User
-      const d = res.json().data.d;
-      this.currentUser = d;
-      this.login = d.LoginName.toLowerCase();
-      if (this.login.indexOf('\\')) {
+      svc.currentUser = res.d;
+      svc.login = res.d.LoginName.toLowerCase();
+      if (svc.login.indexOf('\\')) {
         // Parse domain prefix
-        this.login = this.login.split('\\')[1];
+        svc.login = svc.login.split('\\')[1];
       }
 
       // GET SharePoint List Item
-      const url = this.apiUrl.replace('{0}', listName) + '?$select=JSON,Id,Title&$filter=Title+eq+\'' + this.login + '\'';
-      return this.http.get(url, this.options).toPromise().then(function (res2: Response) {
+      const url = svc.apiUrl.replace('{0}', listName) + '?$select=JSON,Id,Title&$filter=Title+eq+\'' + svc.login + '\'';
+      return svc.http.get(url, svc.options).toPromise().then(function (res2: Response) {
 
         // Parse JSON response
-        const d2 = res2.json().data.d;
-        if (d2.results) {
+        const d2 = res2.json().d;
+        if (d2.results.length) {
           return d2.results[0];
         } else {
           return null;
         }
 
-      }).catch(this.handleError);
+      }).catch(svc.handleError);
     });
   };
 
   // JSON blob upsert write to SharePoint list - SharePoint list name and JS object to stringify for save
   jsonWrite(listName: string, jsonBody: any) {
+    const svc = this;
     return this.refreshDigest().then(function (res: Response) {
-      return this.jsonRead(listName).then(function (item: any) {
+      return svc.jsonRead(listName).then(function (item: any) {
         // HTTP 200 OK
         if (item) {
           // update if found
           item.JSON = JSON.stringify(jsonBody);
-          return this.update(listName, item.Id, item);
+          return svc.update(listName, item.Id, item);
         } else {
           // create if missing
           item = {
             '__metadata': {
               'type': 'SP.ListItem'
             },
-            'Title': this.login,
+            'Title': svc.login,
             'JSON': JSON.stringify(jsonBody)
           };
-          return this.create(listName, item);
+          return svc.create(listName, item);
         }
       });
     });
