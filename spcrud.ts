@@ -1,5 +1,5 @@
 /**
- * Library with AngularJS operations for CRUD operations to SharePoint 2013/2016/Online lists over REST api
+ * Library with Angular 2+ operations for CRUD operations to SharePoint 2013/2016/Online lists over REST api
  *
  * Contains 6 core functions and other misc helper functions
  *
