@@ -1,7 +1,7 @@
 {
   "name": "spcrud",
-  "version": "0.1.22",
-  "description": "Make SharePoint 2013 list item edits easy from JavaScript with a common library that generates HTTP traffic formatted with correct headers and verbs. Enjoy!",
+  "version": "2017.06.16",
+  "description": "Make SharePoint 2013 list item edits easy from JavaScript with a common library that generates HTTP traffic formatted with correct headers and verbs.  Support for both Angular 1 (spcrud.js) and Angular 2+ (spcrud.ts).  Enjoy!",
   "main": "spcrud.js",
   "directories": {
     "doc": "doc"
