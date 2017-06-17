@@ -2,12 +2,40 @@
 Make SharePoint 2013/2016/Online list item edits easy from JavaScript with a common library that generates HTTP traffic formatted with correct headers and verbs. Enjoy!
 
 
-## Get Started
+## Get Started (AngularJS / spcrud.js)
 1. upload files to /SiteAssets/
 2. add Content Editor to homepage
 3. point Content Editor at /SiteAssets/spcrud-demo.html
 4. create new Custom List (ex: "Test")
 5. click buttons to run CRUD operations on list "Test" (or any list)
+
+## Get Started (Angular2+ / spcrud.ts)
+1. Import module with 
+
+```
+import { Spcrud } from './spcrud';
+```
+2. Add provider with
+```
+providers: [Spcrud]
+```
+
+3. Add contstructor with 
+```
+constructor(private spcrud: Spcrud) {
+    this.spcrud.setBaseUrl('http://portal/sites/todo');
+}
+```
+
+4. Add save method with
+```
+saveList() {
+    const ctl = this;
+    this.spcrud.jsonWrite('jsonTodo', this.todos).then(function (r) {
+        ctl.status = r;
+    });
+}
+```
 
 ## Video
 [![](https://raw.githubusercontent.com/spjeff/spcrud/master/doc/7.png)](http://www.spjeff.com/2016/04/10/video-get-started-with-spcrud-js/ "Get Started with SPCRUD")
