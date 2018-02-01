@@ -19,8 +19,8 @@
  * spjeff@spjeff.com
  * http://spjeff.com
  *
- * version 0.1.22
- * last updated 06-06-2017
+ * version 0.1.23
+ * last updated 02-01-2018
  *
  */
 
@@ -57,8 +57,8 @@ spcrud.setBaseUrl = function (webUrl) {
         spcrud.baseUrl = webUrl;
     } else {
         //default local SharePoint context
-        if (_spPageContextInfo) {
-            spcrud.baseUrl = _spPageContextInfo.webAbsoluteUrl;
+        if (window._spPageContextInfo) {
+            spcrud.baseUrl = window._spPageContextInfo.webAbsoluteUrl;
         }
     }
     spcrud.init();
