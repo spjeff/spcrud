@@ -69,6 +69,10 @@ spcrud.setBaseUrl();
 spcrud.endsWith = function (str, suffix) {
     return str.indexOf(suffix, str.length - suffix.length) !== -1;
 };
+spcrud.replaceAll = function(source, str1, str2, ignore) 
+{
+    return source.replace(new RegExp(str1.replace(/([\/\,\!\\\^\$\{\}\[\]\(\)\.\*\+\?\|\<\>\-\&])/g,"\\$&"),(ignore?"gi":"g")),(typeof(str2)=="string")?str2.replace(/\$/g,"$$$$"):str2);
+};
 
 //digest refresh worker
 spcrud.refreshDigest = function ($http) {
@@ -114,42 +118,26 @@ spcrud.sendMail = function ($http, to, ffrom, subj, body) {
 
 //lookup SharePoint current web user
 spcrud.getCurrentUser = function ($http) {
-    if (!spcrud.currentUser) {
-        var url = spcrud.baseUrl + '/_api/web/currentuser?$expand=Groups',
-            config = {
-                method: 'GET',
-                url: url,
-                cache: true,
-                headers: spcrud.headers
-            };
-        return $http(config);
-    } else {
-        return {
-            then: function (a) {
-                a();
-            }
+    var url = spcrud.baseUrl + '/_api/web/currentuser?$expand=Groups',
+        config = {
+            method: 'GET',
+            url: url,
+            cache: true,
+            headers: spcrud.headers
         };
-    }
+    return $http(config);
 };
 
 //lookup my SharePoint profile
 spcrud.getMyProfile = function ($http) {
-    if (!spcrud.myProfile) {
-        var url = spcrud.baseUrl + '/_api/SP.UserProfiles.PeopleManager/GetMyProperties?select=*',
-            config = {
-                method: 'GET',
-                url: url,
-                cache: true,
-                headers: spcrud.headers
-            };
-        return $http(config);
-    } else {
-        return {
-            then: function (a) {
-                a();
-            }
+    var url = spcrud.baseUrl + '/_api/SP.UserProfiles.PeopleManager/GetMyProperties?select=*',
+        config = {
+            method: 'GET',
+            url: url,
+            cache: true,
+            headers: spcrud.headers
         };
-    }
+    return $http(config);
 };
 
 //lookup any SharePoint profile
@@ -421,10 +409,12 @@ spcrud.jsonRead = function ($http, listName, cache) {
         //GET SharePoint Current User
         spcrud.currentUser = response.data.d;
         spcrud.login = response.data.d.LoginName.toLowerCase();
-        if (spcrud.login.indexOf('\\')) {
-            //parse domain prefix
-            spcrud.login = spcrud.login.split('\\')[1];
-        }
+        spcrud.login = spcrud.replaceAll(spcrud.login, '|', '');
+        spcrud.login = spcrud.replaceAll(spcrud.login, '#', '');
+        spcrud.login = spcrud.replaceAll(spcrud.login, '?', '');
+        spcrud.login = spcrud.replaceAll(spcrud.login, '@', '');
+        spcrud.login = spcrud.replaceAll(spcrud.login, '\'', '');
+        spcrud.login = spcrud.replaceAll(spcrud.login, '\\', '');
 
         //default no caching
         if (!cache) {
