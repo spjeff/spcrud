@@ -19,8 +19,8 @@
  * spjeff@spjeff.com
  * http://spjeff.com
  *
- * version 0.1.23
- * last updated 02-01-2018
+ * version 0.1.24
+ * last updated 02-20-2018
  *
  */
 
