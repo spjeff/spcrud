@@ -19,8 +19,8 @@
  * spjeff@spjeff.com
  * http://spjeff.com
  *
- * version 0.2.08
- * last updated 06-16-2017
+ * version 0.2.09
+ * last updated 03-06-2017
  *
  */
 
@@ -126,7 +126,7 @@ export class Spcrud {
     const url = this.baseUrl + '/_api/SP.Utilities.Utility.SendEmail';
     const data = JSON.stringify(message);
     return this.http.post(url, data, this.options).toPromise();
-  };
+  }
 
   // ----------SHAREPOINT USER PROFILES----------
 
@@ -136,7 +136,7 @@ export class Spcrud {
     return this.http.get(url, this.options).toPromise().then(function (res: Response) {
       return res.json();
     }).catch(this.handleError);
-  };
+  }
 
   // Lookup my SharePoint profile
   getMyProfile(): Promise<any> {
@@ -144,7 +144,7 @@ export class Spcrud {
     return this.http.get(url, this.options).toPromise().then(function (res: Response) {
       return res.json();
     }).catch(this.handleError);
-  };
+  }
 
   // Lookup any SharePoint profile
   getProfile(login: string): Promise<any> {
@@ -152,7 +152,7 @@ export class Spcrud {
     return this.http.get(url, this.options).toPromise().then(function (res: Response) {
       return res.json();
     }).catch(this.handleError);
-  };
+  }
 
   // Lookup any SharePoint UserInfo
   getUserInfo(id: string): Promise<any> {
@@ -160,7 +160,7 @@ export class Spcrud {
     return this.http.get(url).toPromise().then(function (res: Response) {
       return res.json();
     }).catch(this.handleError);
-  };
+  }
 
   // Ensure SPUser exists in target web
   ensureUser(login: string): Promise<any> {
@@ -168,7 +168,7 @@ export class Spcrud {
     return this.http.post(url, login, this.options).toPromise().then(function (res: Response) {
       return res.json();
     }).catch(this.handleError);
-  };
+  }
 
   // ----------SHAREPOINT LIST AND FIELDS----------
 
@@ -184,7 +184,7 @@ export class Spcrud {
     return this.http.post(url, data, this.options).toPromise().then(function (res: Response) {
       return res.json();
     }).catch(this.handleError);
-  };
+  }
 
   // Create field
   createField(listTitle: string, fieldName: string, fieldType: string): Promise<any> {
@@ -197,7 +197,7 @@ export class Spcrud {
     return this.http.post(url, data, this.options).toPromise().then(function (res: Response) {
       return res.json();
     }).catch(this.handleError);
-  };
+  }
 
   // ----------SHAREPOINT FILES AND FOLDERS----------
 
@@ -213,7 +213,7 @@ export class Spcrud {
     return this.http.post(url, data, this.options).toPromise().then(function (res: Response) {
       return res.json();
     }).catch(this.handleError);
-  };
+  }
 
   // Upload file to folder
   // https://kushanlahiru.wordpress.com/2016/05/14/file-attach-to-sharepoint-2013-list-custom-using-angular-js-via-rest-api/
@@ -225,7 +225,7 @@ export class Spcrud {
     return this.http.post(url, binary, this.options).toPromise().then(function (res: Response) {
       return res.json();
     }).catch(this.handleError);
-  };
+  }
 
   // Upload attachment to item
   uploadAttach(listName: string, id: string, fileName: string, binary: any, overwrite?: boolean): Promise<any> {
@@ -242,7 +242,7 @@ export class Spcrud {
     return this.http.post(url, binary, options).toPromise().then(function (res: Response) {
       return res.json();
     }).catch(this.handleError);
-  };
+  }
 
   // Get attachment for item
   getAttach(listName: string, id: string): Promise<any> {
@@ -250,7 +250,7 @@ export class Spcrud {
     return this.http.get(url, this.options).toPromise().then(function (res: Response) {
       return res.json();
     }).catch(this.handleError);
-  };
+  }
 
   // Copy file
   copyFile(sourceUrl: string, destinationUrl: string): Promise<any> {
@@ -259,7 +259,7 @@ export class Spcrud {
     return this.http.post(url, this.options).toPromise().then(function (res: Response) {
       return res.json();
     }).catch(this.handleError);
-  };
+  }
 
   // ----------SHAREPOINT LIST CORE----------
 
@@ -276,32 +276,32 @@ export class Spcrud {
     return this.http.post(url, data, this.options).toPromise().then(function (res: Response) {
       return res.json();
     }).catch(this.handleError);
-  };
+  }
 
   // Build URL string with OData parameters
   readBuilder(url: string, options: any): string {
     if (options) {
       if (options.filter) {
-        url += ((this.endsWith(url, 'items')) ? '?' : '&') + '$filter=' + options.filter;
+        url += ((url.indexOf('?') == -1) ? '?' : '&') + '$filter=' + options.filter;
       }
       if (options.select) {
-        url += ((this.endsWith(url, 'items')) ? '?' : '&') + '$select=' + options.select;
+        url += ((url.indexOf('?') == -1) ? '?' : '&') + '$select=' + options.select;
       }
       if (options.orderby) {
-        url += ((this.endsWith(url, 'items')) ? '?' : '&') + '$orderby=' + options.orderby;
+        url += ((url.indexOf('?') == -1) ? '?' : '&') + '$orderby=' + options.orderby;
       }
       if (options.expand) {
-        url += ((this.endsWith(url, 'items')) ? '?' : '&') + '$expand=' + options.expand;
+        url += ((url.indexOf('?') == -1) ? '?' : '&') + '$expand=' + options.expand;
       }
       if (options.top) {
-        url += ((this.endsWith(url, 'items')) ? '?' : '&') + '$top=' + options.top;
+        url += ((url.indexOf('?') == -1) ? '?' : '&') + '$top=' + options.top;
       }
       if (options.skip) {
-        url += ((this.endsWith(url, 'items')) ? '?' : '&') + '$skip=' + options.skip;
+        url += ((url.indexOf('?') == -1) ? '?' : '&') + '$skip=' + options.skip;
       }
     }
     return url;
-  };
+  }
 
   // READ entire list - needs $http factory and SharePoint list name
   read(listName: string, options?: any): Promise<any> {
@@ -312,7 +312,7 @@ export class Spcrud {
     return this.http.get(url, this.options).toPromise().then(function (resp: Response) {
       return resp.json();
     });
-  };
+  }
 
   // READ single item - SharePoint list name, and item ID number
   readItem(listName: string, id: string): Promise<any> {
@@ -321,7 +321,7 @@ export class Spcrud {
     return this.http.get(url, this.options).toPromise().then(function (resp: Response) {
       return resp.json();
     });
-  };
+  }
 
   // UPDATE item - SharePoint list name, item ID number, and JS object to stringify for save
   update(listName: string, id: string, jsonBody: any): Promise<any> {
@@ -341,7 +341,7 @@ export class Spcrud {
     return this.http.post(url, data, localOptions).toPromise().then(function (resp: Response) {
       return resp.json();
     });
-  };
+  }
 
   // DELETE item - SharePoint list name and item ID number
   del(listName: string, id: string): Promise<any> {
@@ -353,7 +353,7 @@ export class Spcrud {
     return this.http.post(url, localOptions).toPromise().then(function (resp: Response) {
       return resp.json();
     });
-  };
+  }
 
   // JSON blob read from SharePoint list - SharePoint list name
   jsonRead(listName: string): Promise<any> {
@@ -381,7 +381,7 @@ export class Spcrud {
 
       }).catch(svc.handleError);
     });
-  };
+  }
 
   // JSON blob upsert write to SharePoint list - SharePoint list name and JS object to stringify for save
   jsonWrite(listName: string, jsonBody: any) {
@@ -406,6 +406,6 @@ export class Spcrud {
         }
       });
     });
-  };
+  }
   // **
 }
