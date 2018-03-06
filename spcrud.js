@@ -19,8 +19,8 @@
  * spjeff@spjeff.com
  * http://spjeff.com
  *
- * version 0.1.24
- * last updated 02-20-2018
+ * version 0.1.25
+ * last updated 03-06-2018
  *
  */
 
@@ -48,7 +48,7 @@ spcrud.init = function () {
         //digest local to ASPX page
         spcrud.headers['X-RequestDigest'] = el.value;
     }
-};
+}
 
 //change target web URL
 spcrud.setBaseUrl = function (webUrl) {
@@ -62,17 +62,18 @@ spcrud.setBaseUrl = function (webUrl) {
         }
     }
     spcrud.init();
-};
+}
 spcrud.setBaseUrl();
 
 //string ends with
 spcrud.endsWith = function (str, suffix) {
     return str.indexOf(suffix, str.length - suffix.length) !== -1;
-};
+}
+
 spcrud.replaceAll = function(source, str1, str2, ignore) 
 {
     return source.replace(new RegExp(str1.replace(/([\/\,\!\\\^\$\{\}\[\]\(\)\.\*\+\?\|\<\>\-\&])/g,"\\$&"),(ignore?"gi":"g")),(typeof(str2)=="string")?str2.replace(/\$/g,"$$$$"):str2);
-};
+}
 
 //digest refresh worker
 spcrud.refreshDigest = function ($http) {
@@ -85,7 +86,7 @@ spcrud.refreshDigest = function ($http) {
         //parse JSON and save
         spcrud.headers['X-RequestDigest'] = response.data.d.GetContextWebInformation.FormDigestValue;
     });
-};
+}
 
 //send email
 spcrud.sendMail = function ($http, to, ffrom, subj, body) {
@@ -112,7 +113,7 @@ spcrud.sendMail = function ($http, to, ffrom, subj, body) {
             data: angular.toJson(message)
         };
     return $http(config);
-};
+}
 
 //----------SHAREPOINT USER PROFILES----------
 
@@ -126,7 +127,7 @@ spcrud.getCurrentUser = function ($http) {
             headers: spcrud.headers
         };
     return $http(config);
-};
+}
 
 //lookup my SharePoint profile
 spcrud.getMyProfile = function ($http) {
@@ -138,7 +139,7 @@ spcrud.getMyProfile = function ($http) {
             headers: spcrud.headers
         };
     return $http(config);
-};
+}
 
 //lookup any SharePoint profile
 spcrud.getProfile = function ($http, login) {
@@ -149,7 +150,7 @@ spcrud.getProfile = function ($http, login) {
             headers: spcrud.headers
         };
     return $http(config);
-};
+}
 
 //lookup any SharePoint UserInfo
 spcrud.getUserInfo = function ($http, Id) {
@@ -160,7 +161,7 @@ spcrud.getUserInfo = function ($http, Id) {
             headers: spcrud.headers
         };
     return $http(config);
-};
+}
 
 //ensure SPUser exists in target web
 spcrud.ensureUser = function ($http, login) {
@@ -172,7 +173,7 @@ spcrud.ensureUser = function ($http, login) {
             data: login
         };
     return $http(config);
-};
+}
 
 
 //----------SHAREPOINT LIST AND FIELDS----------
@@ -192,7 +193,7 @@ spcrud.createList = function ($http, title, baseTemplate, description) {
             data: data
         };
     return $http(config);
-};
+}
 
 //create field
 spcrud.createField = function ($http, listTitle, fieldName, fieldType) {
@@ -209,7 +210,7 @@ spcrud.createField = function ($http, listTitle, fieldName, fieldType) {
             data: data
         };
     return $http(config);
-};
+}
 
 //----------SHAREPOINT FILES AND FOLDERS----------
 
@@ -229,7 +230,7 @@ spcrud.createFolder = function ($http, folderUrl) {
             data: data
         };
     return $http(config);
-};
+}
 
 // upload file to folder
 // https://kushanlahiru.wordpress.com/2016/05/14/file-attach-to-sharepoint-2013-list-custom-using-angular-js-via-rest-api/
@@ -245,7 +246,7 @@ spcrud.uploadFile = function ($http, folderUrl, fileName, binary) {
             transformRequest: []
         };
     return $http(config);
-};
+}
 
 //upload attachment to item
 spcrud.uploadAttach = function ($http, listName, id, fileName, binary, overwrite) {
@@ -268,7 +269,7 @@ spcrud.uploadAttach = function ($http, listName, id, fileName, binary, overwrite
         data: binary
     };
     return $http(config);
-};
+}
 
 //get attachment for item
 spcrud.getAttach = function ($http, listName, id) {
@@ -279,7 +280,7 @@ spcrud.getAttach = function ($http, listName, id) {
             headers: spcrud.headers
         };
     return $http(config);
-};
+}
 
 //copy file
 spcrud.copyFile = function ($http, sourceUrl, destinationUrl) {
@@ -290,7 +291,7 @@ spcrud.copyFile = function ($http, sourceUrl, destinationUrl) {
             headers: spcrud.headers
         };
     return $http(config);
-};
+}
 
 //----------SHAREPOINT LIST CORE----------
 
@@ -310,31 +311,31 @@ spcrud.create = function ($http, listName, jsonBody) {
             headers: spcrud.headers
         };
     return $http(config);
-};
+}
 
 spcrud.readBuilder = function (url, options) {
     if (options) {
         if (options.filter) {
-            url += ((spcrud.endsWith(url, 'items')) ? "?" : "&") + "$filter=" + options.filter;
+            url += ((url.indexOf('?')) ? "?" : "&") + "$filter=" + options.filter;
         }
         if (options.select) {
-            url += ((spcrud.endsWith(url, 'items')) ? "?" : "&") + "$select=" + options.select;
+            url += ((url.indexOf('?')) ? "?" : "&") + "$select=" + options.select;
         }
         if (options.orderby) {
-            url += ((spcrud.endsWith(url, 'items')) ? "?" : "&") + "$orderby=" + options.orderby;
+            url += ((url.indexOf('?')) ? "?" : "&") + "$orderby=" + options.orderby;
         }
         if (options.expand) {
-            url += ((spcrud.endsWith(url, 'items')) ? "?" : "&") + "$expand=" + options.expand;
+            url += ((url.indexOf('?')) ? "?" : "&") + "$expand=" + options.expand;
         }
         if (options.top) {
-            url += ((spcrud.endsWith(url, 'items')) ? "?" : "&") + "$top=" + options.top;
+            url += ((url.indexOf('?')) ? "?" : "&") + "$top=" + options.top;
         }
         if (options.skip) {
-            url += ((spcrud.endsWith(url, 'items')) ? "?" : "&") + "$skip=" + options.skip;
+            url += ((url.indexOf('?')) ? "?" : "&") + "$skip=" + options.skip;
         }
     }
     return url;
-};
+}
 
 //READ entire list - needs $http factory and SharePoint list name
 spcrud.read = function ($http, listName, options) {
@@ -350,7 +351,7 @@ spcrud.read = function ($http, listName, options) {
         headers: spcrud.headers
     };
     return $http(config);
-};
+}
 
 //READ single item - SharePoint list name, and item ID number
 spcrud.readItem = function ($http, listName, id) {
@@ -364,7 +365,7 @@ spcrud.readItem = function ($http, listName, id) {
         headers: spcrud.headers
     };
     return $http(config);
-};
+}
 
 //UPDATE item - SharePoint list name, item ID number, and JS object to stringify for save
 spcrud.update = function ($http, listName, id, jsonBody) {
@@ -387,7 +388,7 @@ spcrud.update = function ($http, listName, id, jsonBody) {
             headers: headers
         };
     return $http(config);
-};
+}
 
 //DELETE item - SharePoint list name and item ID number
 spcrud.del = function ($http, listName, id) {
@@ -401,7 +402,7 @@ spcrud.del = function ($http, listName, id) {
         headers: headers
     };
     return $http(config);
-};
+}
 
 //JSON blob read from SharePoint list - SharePoint list name
 spcrud.jsonRead = function ($http, listName, cache) {
@@ -443,7 +444,7 @@ spcrud.jsonRead = function ($http, listName, cache) {
             }
         });
     });
-};
+}
 
 //JSON blob upsert write to SharePoint list - SharePoint list name and JS object to stringify for save
 spcrud.jsonWrite = function ($http, listName, jsonBody) {
@@ -467,4 +468,4 @@ spcrud.jsonWrite = function ($http, listName, jsonBody) {
             }
         });
     });
-};
+}
