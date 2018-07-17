@@ -19,8 +19,8 @@
  * spjeff@spjeff.com
  * http://spjeff.com
  *
- * version 0.1.25
- * last updated 03-06-2018
+ * version 0.1.26
+ * last updated 07-17-2018
  *
  */
 
@@ -316,22 +316,22 @@ spcrud.create = function ($http, listName, jsonBody) {
 spcrud.readBuilder = function (url, options) {
     if (options) {
         if (options.filter) {
-            url += ((url.indexOf('?')) ? "?" : "&") + "$filter=" + options.filter;
+            url += ((url.indexOf('?') > -1) ? "&" : "?") + "$filter=" + options.filter;
         }
         if (options.select) {
-            url += ((url.indexOf('?')) ? "?" : "&") + "$select=" + options.select;
+            url += ((url.indexOf('?') > -1) ? "&" : "?") + "$select=" + options.select;
         }
         if (options.orderby) {
-            url += ((url.indexOf('?')) ? "?" : "&") + "$orderby=" + options.orderby;
+            url += ((url.indexOf('?') > -1) ? "&" : "?") + "$orderby=" + options.orderby;
         }
         if (options.expand) {
-            url += ((url.indexOf('?')) ? "?" : "&") + "$expand=" + options.expand;
+            url += ((url.indexOf('?') > -1) ? "&" : "?") + "$expand=" + options.expand;
         }
         if (options.top) {
-            url += ((url.indexOf('?')) ? "?" : "&") + "$top=" + options.top;
+            url += ((url.indexOf('?') > -1) ? "&" : "?") + "$top=" + options.top;
         }
         if (options.skip) {
-            url += ((url.indexOf('?')) ? "?" : "&") + "$skip=" + options.skip;
+            url += ((url.indexOf('?') > -1) ? "&" : "?") + "$skip=" + options.skip;
         }
     }
     return url;
