@@ -19,8 +19,8 @@
  * spjeff@spjeff.com
  * http://spjeff.com
  *
- * version 0.2.09
- * last updated 03-06-2017
+ * version 0.2.10
+ * last updated 11-24-2018
  *
  */
 
@@ -350,7 +350,7 @@ export class Spcrud {
     localOptions.headers.append('X-HTTP-Method', 'DELETE');
     localOptions.headers.append('If-Match', '*');
     const url = this.apiUrl.replace('{0}', listName) + '(' + id + ')';
-    return this.http.post(url, localOptions).toPromise().then(function (resp: Response) {
+    return this.http.post(url, '', localOptions).toPromise().then(function (resp: Response) {
       return resp.json();
     });
   }
